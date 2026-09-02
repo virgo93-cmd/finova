@@ -21,14 +21,25 @@ export async function POST(request: Request) {
   const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!webhookSecret || !supabaseUrl || !serviceRoleKey) {
-    return Response.json({ status: 'configuration_error' }, { status: 500 });
+  const missing = [
+    !webhookSecret && 'LEMON_SQUEEZY_WEBHOOK_SECRET',
+    !supabaseUrl && 'SUPABASE_URL',
+    !serviceRoleKey && 'SUPABASE_SERVICE_ROLE_KEY',
+  ].filter(Boolean);
+  if (missing.length > 0) {
+    return Response.json(
+      { status: 'configuration_error', missing },
+      { status: 500 },
+    );
   }
+  const configuredWebhookSecret = webhookSecret!;
+  const configuredSupabaseUrl = supabaseUrl!;
+  const configuredServiceRoleKey = serviceRoleKey!;
 
   const rawBody = await request.text();
   const suppliedHex = request.headers.get('x-signature') ?? '';
   const expectedHex = crypto
-    .createHmac('sha256', webhookSecret)
+    .createHmac('sha256', configuredWebhookSecret)
     .update(rawBody)
     .digest('hex');
   const supplied = Buffer.from(suppliedHex, 'utf8');
@@ -57,12 +68,12 @@ export async function POST(request: Request) {
   }
 
   const databaseResponse = await fetch(
-    `${supabaseUrl}/rest/v1/rpc/finova_grant_premium`,
+    `${configuredSupabaseUrl}/rest/v1/rpc/finova_grant_premium`,
     {
       method: 'POST',
       headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
+        apikey: configuredServiceRoleKey,
+        Authorization: `Bearer ${configuredServiceRoleKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -80,4 +91,3 @@ export async function POST(request: Request) {
   }
   return Response.json({ status: 'success' });
 }
-
