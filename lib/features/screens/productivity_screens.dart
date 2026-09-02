@@ -438,6 +438,7 @@ class InsightsPage extends ConsumerStatefulWidget {
 class _InsightsPageState extends ConsumerState<InsightsPage> {
   int tab = 0;
   int days = 30;
+  int categoryType = 0;
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(finovaControllerProvider).value;
@@ -532,11 +533,19 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     Iterable<MoneyTransaction> tx,
     FinanceSummary sum,
   ) {
-    final by = <String, int>{};
+    final expensesByCategory = <String, int>{};
     for (final t in tx.where((x) => x.type == TransactionType.expense)) {
-      by[t.categoryName] = (by[t.categoryName] ?? 0) + t.amount;
+      expensesByCategory[t.categoryName] =
+          (expensesByCategory[t.categoryName] ?? 0) + t.amount;
     }
-    final sorted = by.entries.toList()
+    final incomeByCategory = <String, int>{};
+    for (final t in tx.where((x) => x.type == TransactionType.income)) {
+      incomeByCategory[t.categoryName] =
+          (incomeByCategory[t.categoryName] ?? 0) + t.amount;
+    }
+    final sortedExpenses = expensesByCategory.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedIncome = incomeByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     if (tx.isEmpty) {
       return [
@@ -554,19 +563,106 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         ('Bersih', sum.balance),
       ], s.settings.currency),
       const SizedBox(height: 22),
-      const SectionTitle('Pengeluaran per kategori'),
-      ...sorted.map(
-        (e) => ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(e.key),
-          trailing: Text(formatMoney(e.value, s.settings.currency)),
-          subtitle: LinearProgressIndicator(
-            value: sum.expense == 0 ? 0 : e.value / sum.expense,
-          ),
-        ),
+      const SectionTitle('Peringkat kategori'),
+      const SizedBox(height: 8),
+      SegmentedButton<int>(
+        segments: const [
+          ButtonSegment(value: 0, label: Text('Semua')),
+          ButtonSegment(value: 1, label: Text('Pengeluaran')),
+          ButtonSegment(value: 2, label: Text('Pemasukan')),
+        ],
+        selected: {categoryType},
+        onSelectionChanged: (value) =>
+            setState(() => categoryType = value.first),
       ),
+      if (categoryType != 2) ...[
+        const SizedBox(height: 18),
+        _categoryHeading(
+          c,
+          'Pengeluaran terbesar',
+          sortedExpenses.firstOrNull,
+          s.settings.currency,
+          const Color(0xFFE76F51),
+        ),
+        ..._categoryRows(
+          sortedExpenses,
+          sum.expense,
+          s.settings.currency,
+          const Color(0xFFE76F51),
+        ),
+      ],
+      if (categoryType != 1) ...[
+        const SizedBox(height: 18),
+        _categoryHeading(
+          c,
+          'Pemasukan terbesar',
+          sortedIncome.firstOrNull,
+          s.settings.currency,
+          const Color(0xFF159B7D),
+        ),
+        ..._categoryRows(
+          sortedIncome,
+          sum.income,
+          s.settings.currency,
+          const Color(0xFF159B7D),
+        ),
+      ],
     ];
   }
+
+  Widget _categoryHeading(
+    BuildContext context,
+    String label,
+    MapEntry<String, int>? top,
+    String currency,
+    Color color,
+  ) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .1),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.leaderboard_outlined, color: color),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.labelMedium),
+              Text(
+                top == null ? 'Belum ada data' : top.key,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+        if (top != null) Text(formatMoney(top.value, currency)),
+      ],
+    ),
+  );
+
+  Iterable<Widget> _categoryRows(
+    List<MapEntry<String, int>> entries,
+    int total,
+    String currency,
+    Color color,
+  ) => entries
+      .take(8)
+      .map(
+        (entry) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(entry.key),
+          trailing: Text(formatMoney(entry.value, currency)),
+          subtitle: LinearProgressIndicator(
+            value: total == 0 ? 0 : entry.value / total,
+            color: color,
+          ),
+        ),
+      );
 
   List<Widget> _productivity(BuildContext c, FinovaState s, DateTime start) {
     final tasks = s.tasks.where((t) => t.createdAt.isAfter(start)).toList();

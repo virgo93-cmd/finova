@@ -34,6 +34,9 @@ Last updated: 2 September 2026
 - [x] Modern seven-day spending chart on the dashboard
 - [x] Privacy copy updated for account, Drive backup, and payment processing
 - [x] Signed Finova 2.0.0 APK built and installed without startup crash
+- [x] Login UI decoupled from optional profile query so valid sessions remain visible
+- [x] Dashboard chart compares income and expenses for seven days
+- [x] Insights filter ranks both largest expense and income categories
 
 ## NOT STARTED — EXTERNAL CONFIGURATION
 

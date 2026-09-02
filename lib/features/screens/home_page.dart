@@ -39,12 +39,22 @@ class HomePage extends ConsumerWidget {
                   budget.month.month == now.month,
             )
             .firstOrNull;
-        final spendingTrend = List<int>.generate(7, (index) {
+        final expenseTrend = List<int>.generate(7, (index) {
           final day = dateOnly(now.subtract(Duration(days: 6 - index)));
           return state.transactions
               .where(
                 (item) =>
                     item.type == TransactionType.expense &&
+                    dateOnly(item.date) == day,
+              )
+              .fold(0, (sum, item) => sum + item.amount);
+        });
+        final incomeTrend = List<int>.generate(7, (index) {
+          final day = dateOnly(now.subtract(Duration(days: 6 - index)));
+          return state.transactions
+              .where(
+                (item) =>
+                    item.type == TransactionType.income &&
                     dateOnly(item.date) == day,
               )
               .fold(0, (sum, item) => sum + item.amount);
@@ -134,9 +144,12 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const SectionTitle('Tren pengeluaran 7 hari'),
+                const SectionTitle('Tren arus kas 7 hari'),
                 const SizedBox(height: 10),
-                _SpendingChart(values: spendingTrend),
+                _CashflowChart(
+                  incomeValues: incomeTrend,
+                  expenseValues: expenseTrend,
+                ),
                 const SizedBox(height: 24),
                 SectionTitle(
                   'Anggaran bulanan',
@@ -364,74 +377,137 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class _SpendingChart extends StatelessWidget {
-  const _SpendingChart({required this.values});
-  final List<int> values;
+class _CashflowChart extends StatelessWidget {
+  const _CashflowChart({
+    required this.incomeValues,
+    required this.expenseValues,
+  });
+  final List<int> incomeValues;
+  final List<int> expenseValues;
 
   @override
   Widget build(BuildContext context) {
-    final maxValue = values.fold(0, (a, b) => a > b ? a : b);
+    final maxValue = [
+      ...incomeValues,
+      ...expenseValues,
+    ].fold(0, (a, b) => a > b ? a : b);
     return Semantics(
-      label: 'Grafik pengeluaran tujuh hari terakhir',
+      label: 'Grafik pemasukan dan pengeluaran tujuh hari terakhir',
       child: Container(
-        height: 150,
+        height: 178,
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: maxValue == 0
-            ? const Center(child: Text('Belum ada pengeluaran dalam 7 hari.'))
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(values.length, (index) {
-                  final ratio = values[index] / maxValue;
-                  final day = DateTime.now().subtract(
-                    Duration(days: 6 - index),
-                  );
-                  const labels = [
-                    'Sen',
-                    'Sel',
-                    'Rab',
-                    'Kam',
-                    'Jum',
-                    'Sab',
-                    'Min',
-                  ];
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: FractionallySizedBox(
-                                heightFactor: ratio.clamp(.04, 1),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(8),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _legend(context, const Color(0xFF159B7D), 'Pemasukan'),
+                const SizedBox(width: 12),
+                _legend(context, const Color(0xFFE76F51), 'Pengeluaran'),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: maxValue == 0
+                  ? const Center(
+                      child: Text('Belum ada transaksi dalam 7 hari.'),
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: List.generate(incomeValues.length, (index) {
+                        final incomeRatio = incomeValues[index] / maxValue;
+                        final expenseRatio = expenseValues[index] / maxValue;
+                        final day = DateTime.now().subtract(
+                          Duration(days: 6 - index),
+                        );
+                        const labels = [
+                          'Sen',
+                          'Sel',
+                          'Rab',
+                          'Kam',
+                          'Jum',
+                          'Sab',
+                          'Min',
+                        ];
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Expanded(
+                                          child: FractionallySizedBox(
+                                            heightFactor: incomeRatio.clamp(
+                                              .03,
+                                              1,
+                                            ),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF159B7D),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Expanded(
+                                          child: FractionallySizedBox(
+                                            heightFactor: expenseRatio.clamp(
+                                              .03,
+                                              1,
+                                            ),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE76F51),
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  labels[day.weekday - 1],
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            labels[day.weekday - 1],
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
+                        );
+                      }),
                     ),
-                  );
-                }),
-              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _legend(BuildContext context, Color color, String label) => Row(
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 5),
+      Text(label, style: Theme.of(context).textTheme.labelSmall),
+    ],
+  );
 }

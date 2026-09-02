@@ -19,6 +19,17 @@ class AccountState {
   final String? avatarUrl;
   final DateTime? premiumExpiresAt;
 
+  factory AccountState.fromUser(User user) => AccountState(
+    user: user,
+    displayName:
+        user.userMetadata?['full_name'] as String? ??
+        user.userMetadata?['name'] as String? ??
+        user.email,
+    avatarUrl:
+        user.userMetadata?['avatar_url'] as String? ??
+        user.userMetadata?['picture'] as String?,
+  );
+
   bool get isSignedIn => user != null;
   bool get isPremium =>
       premiumExpiresAt != null && premiumExpiresAt!.isAfter(DateTime.now());
@@ -27,24 +38,28 @@ class AccountState {
 final accountProvider = AsyncNotifierProvider<AccountController, AccountState>(
   AccountController.new,
 );
-final authEventsProvider = StreamProvider<AuthState>(
-  (ref) => AuthService.instance.authChanges,
-);
 
 class AccountController extends AsyncNotifier<AccountState> {
   @override
   Future<AccountState> build() async {
-    ref.watch(authEventsProvider);
     final user = AuthService.instance.user;
     if (user == null) {
       AdService.setPremium(false);
       return const AccountState();
     }
-    final row = await AuthService.instance.supabase
-        .from('finova_profiles')
-        .select('display_name,avatar_url,is_premium,premium_expires_at')
-        .eq('id', user.id)
-        .maybeSingle();
+    Map<String, dynamic>? row;
+    try {
+      row = await AuthService.instance.supabase
+          .from('finova_profiles')
+          .select('display_name,avatar_url,is_premium,premium_expires_at')
+          .eq('id', user.id)
+          .maybeSingle();
+    } catch (_) {
+      // Authentication is still valid when optional profile enrichment is
+      // temporarily unavailable. Never hide a successful login because of it.
+      AdService.setPremium(false);
+      return AccountState.fromUser(user);
+    }
     final expiry = DateTime.tryParse(
       row?['premium_expires_at'] as String? ?? '',
     );

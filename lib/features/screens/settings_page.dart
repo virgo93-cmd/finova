@@ -178,7 +178,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     BuildContext context,
     AsyncValue<AccountState> accountValue,
   ) {
-    final account = accountValue.value ?? const AccountState();
+    final currentUser = AuthService.instance.user;
+    final account =
+        accountValue.value ??
+        (currentUser == null
+            ? const AccountState()
+            : AccountState.fromUser(currentUser));
     final user = account.user;
     final name = account.displayName ?? user?.email ?? 'Pengguna Finova';
     final avatar = account.avatarUrl;
@@ -218,6 +223,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             label: Text('Premium'),
                           )
                         : const Icon(Icons.verified, color: Color(0xFF087F68)),
+                    onTap: () => _editProfile(account),
                   ),
                   const Divider(),
                   ListTile(
@@ -226,7 +232,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     subtitle: const Text(
                       'Simpan seluruh data lokal ke folder pribadi Finova.',
                     ),
-                    onTap: () => _editProfile(account),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -285,8 +290,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   Future<void> _signIn() async {
     setState(() => _authBusy = true);
     try {
-      await AuthService.instance.signInWithGoogle();
-      ref.invalidate(accountProvider);
+      final signedInUser = await AuthService.instance.signInWithGoogle();
+      if (AuthService.instance.user?.id != signedInUser.id) {
+        throw StateError('Sesi Google tidak tersimpan. Silakan coba kembali.');
+      }
+      await ref.read(accountProvider.notifier).refresh();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Akun Google berhasil terhubung.')),
@@ -511,7 +519,7 @@ class AboutPage extends StatelessWidget {
           ),
           const Text('Keuangan tertata. Hidup terarah.'),
           const SizedBox(height: 8),
-          const Text('Versi 2.0.0'),
+          const Text('Versi 2.0.1'),
           const Spacer(),
           const Text(
             'Dibuat untuk pencatatan keuangan dan produktivitas yang tenang serta tersimpan lokal.',
