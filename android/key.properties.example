@@ -1,0 +1,6 @@
+# Copy to android/key.properties after creating the private upload key.
+# Never commit the real key.properties or .jks file.
+storePassword=YOUR_PRIVATE_STORE_PASSWORD
+keyPassword=YOUR_PRIVATE_KEY_PASSWORD
+keyAlias=finova-upload
+storeFile=../../keystore/finova-upload.jks
