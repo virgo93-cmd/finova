@@ -1,5 +1,6 @@
 import 'package:finova/core/database/finova_database.dart';
 import 'package:finova/core/models/models.dart';
+import 'package:finova/core/services/backup_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +21,7 @@ class FinovaState {
     required this.tasks,
     required this.habits,
     required this.debts,
+    required this.goals,
     required this.settings,
   });
   final List<Category> categories;
@@ -28,6 +30,7 @@ class FinovaState {
   final List<FinovaTask> tasks;
   final List<Habit> habits;
   final List<DebtRecord> debts;
+  final List<SavingsGoal> goals;
   final FinovaSettings settings;
 }
 
@@ -55,6 +58,7 @@ class FinovaController extends AsyncNotifier<FinovaState> {
     tasks: await _db.tasks(),
     habits: await _db.habits(),
     debts: await _db.debts(),
+    goals: await _db.goals(),
     settings: _settings(),
   );
   Future<void> refresh() async {
@@ -173,6 +177,30 @@ class FinovaController extends AsyncNotifier<FinovaState> {
   Future<void> updateDebtPayment(DebtRecord debt, int paidAmount) =>
       _mutate(() => _db.updateDebtPayment(debt.id, paidAmount, debt.amount));
   Future<void> deleteDebt(int id) => _mutate(() => _db.deleteDebt(id));
+  Future<void> saveGoal({
+    int? id,
+    required String title,
+    required int targetAmount,
+    required int currentAmount,
+    DateTime? targetDate,
+  }) => _mutate(
+    () => _db.saveGoal(
+      id: id,
+      title: title,
+      targetAmount: targetAmount,
+      currentAmount: currentAmount,
+      targetDate: targetDate,
+    ),
+  );
+  Future<void> deleteGoal(int id) => _mutate(() => _db.deleteGoal(id));
+  Future<DateTime> createCloudBackup() =>
+      BackupService(_db, _prefs).createBackup();
+  Future<DateTime> restoreCloudBackup() async {
+    final restoredAt = await BackupService(_db, _prefs).restoreBackup();
+    state = await AsyncValue.guard(_load);
+    return restoredAt;
+  }
+
   Future<void> resetAll() async {
     await _db.resetAll();
     await _prefs.clear();

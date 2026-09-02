@@ -1,44 +1,51 @@
 # Finova Progress
 
+Last updated: 2 September 2026
+
 ## DONE
 
-- Flutter Android/iOS scaffold created on Flutter 3.44.4
-- Architecture and storage decisions recorded
-- Production dependencies resolved
-- SQLite schema with protected categories, transactions, budgets, tasks, habits/logs, goals, settings, indexes, and reset
-- Riverpod state/repository boundary and integer-money calculations
-- Onboarding/setup, dashboard, quick entry, transaction/category CRUD and filters
-- Monthly/category budgets, task CRUD, habit CRUD/check-ins, real streak logic
-- Finance/productivity insights, themes, currency preferences, privacy/about/licenses
-- AdMob test configuration, resilient banners, capped interstitial, and UMP consent request
-- Original Finova logo, generated Android/iOS launcher icons, Play Store icon, and feature graphic
-- Publisher-ready Privacy Policy, Terms of Use, store listing, and Play declaration drafts
-- Contextual notification permission and a real 7:00 PM daily local reminder
-- Android application ID finalized as `com.finova.app`
-- Production Android AdMob App ID configured; debug builds continue using official Google test ad units
-- Production Banner, Interstitial, and Rewarded unit IDs configured centrally; debug builds use official test units
-- Six deterministic business-logic tests
-- `flutter analyze`: no issues found
-- `flutter test`: all tests passed
-- Android debug APK built successfully
-- Signed Android release App Bundle (`app-release.aab`) built successfully with production AdMob configuration
-- Release-only WorkManager/R8 startup crash reproduced on a physical Vivo device and fixed by disabling shrinking for the first production release
-- Corrected release APK installed and verified running on physical device with no AndroidRuntime crash
-- Vercel-ready Finova landing page completed under `landing-page/` with signed APK download, checksum, Privacy Policy, Terms, SEO/social metadata, sitemap, robots, and app-ads.txt
+- [x] Indonesian onboarding, currency setup, light/dark theme
+- [x] SQLite local-first database and migrations
+- [x] Transactions, system/custom categories, budgets
+- [x] Tasks, habits, real streak calculations
+- [x] Debts and receivables with payment progress
+- [x] Finance/productivity insights using local data
+- [x] Notification foundation and settings
+- [x] AdMob banner, interstitial frequency manager, rewarded infrastructure and consent flow
+- [x] Signed Android release build and external APK distribution
+- [x] Landing page, privacy/terms, app-ads.txt and custom domain preparation
+- [x] Supabase schema with RLS-protected profiles/payments
+- [x] Google Cloud OAuth clients, Drive API/scope, Supabase Google provider
+- [x] Native Google login tested successfully on physical Android device
 
 ## IN PROGRESS
 
-- None for the repository-deliverable MVP.
+- [ ] Physical-device QA for Google Drive backup and restore
+- [ ] End-to-end real Lemon Squeezy payment test
 
-## NOT STARTED
+## DONE — UPGRADE 2.0
 
-- Publisher-owned Play Store release configuration and signing
+- [x] Schema-versioned Google Drive backup and transactional restore
+- [x] Editable Google profile and real-time premium entitlement UI
+- [x] Lemon Squeezy 30-day checkout with Supabase user custom data
+- [x] HMAC-verified, idempotent Vercel webhook and atomic premium grant
+- [x] Global premium state disables banner, interstitial, and rewarded ads
+- [x] Savings-goal CRUD and progress tracking
+- [x] Modern seven-day spending chart on the dashboard
+- [x] Privacy copy updated for account, Drive backup, and payment processing
+- [x] Signed Finova 2.0.0 APK built and installed without startup crash
 
-## KNOWN ISSUE
+## NOT STARTED — EXTERNAL CONFIGURATION
 
-- Production AdMob IDs, privacy URLs, and signing material are intentionally external.
-- The `flutter_timezone` plugin currently emits a future Flutter/Kotlin migration warning but builds successfully.
+- [ ] Add production webhook environment variables to Vercel
+- [ ] Register the deployed `/api/webhook` URL in Lemon Squeezy
+
+## KNOWN ISSUES
+
+- `flutter_timezone` currently emits a future Kotlin Gradle migration warning; builds still succeed.
+- Google OAuth application is in Testing mode, so only registered test users can sign in.
+- App is distributed from the website and is not yet registered in Google Play.
 
 ## NEXT ACTION
 
-- Supply production identifiers/policies/signing, verify consent on regional test devices, and test the signed release build.
+Test Backup and Pulihkan on the connected phone, configure Vercel secrets, then complete one Lemon Squeezy test-mode purchase.

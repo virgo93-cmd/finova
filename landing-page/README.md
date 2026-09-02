@@ -25,7 +25,8 @@ npm run build
 
 ## Required public endpoints
 
-- `/downloads/finova-android-v1.1.0.apk` — signed Android release APK
+- `/downloads/finova-android-v2.0.0.apk` — signed Android release APK
+- `/api/webhook` — signed Lemon Squeezy `order_created` webhook
 - `/privacy` — Privacy Policy
 - `/terms` — Terms of Use
 - `/app-ads.txt` — AdMob authorized seller declaration
@@ -33,9 +34,16 @@ npm run build
 
 ## Release file
 
-- Version: `1.0.0`
-- SHA-256: `2826507E293FCE254640EB0DD02B501278523CB9C9CE49CDF0725390C9179E1F`
+- Version: `2.0.0`
+- SHA-256: `EF3DFD0B99B549543BBB5304A5D52E4DE2BE7FF810C4407150B08951B024178F`
 
 When the APK changes, replace the file in `public/downloads`, update the version and checksum on the homepage, then run `npm run build` again.
 
 The support email currently shown is `support@finova.ailooma.biz.id`; configure that mailbox or replace it before public launch.
+
+## Premium webhook environment
+
+Copy `.env.example` values into Vercel Environment Variables. Keep
+`LEMON_SQUEEZY_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` secret. Configure
+the Lemon Squeezy webhook URL as `https://finova.ailooma.biz.id/api/webhook` and
+subscribe to `order_created`.

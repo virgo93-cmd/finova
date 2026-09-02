@@ -27,8 +27,23 @@ class AdConfig {
 }
 
 class AdService {
+  static final premium = ValueNotifier<bool>(false);
   static int _actions = 0;
   static InterstitialAd? _interstitial;
+  static bool get adsAllowed => !premium.value;
+
+  static void setPremium(bool value) {
+    if (premium.value == value) return;
+    premium.value = value;
+    if (value) {
+      _interstitial?.dispose();
+      _interstitial = null;
+      _actions = 0;
+    } else {
+      _loadInterstitial();
+    }
+  }
+
   static Future<void> initializeInBackground() async {
     try {
       ConsentInformation.instance.requestConsentInfoUpdate(
@@ -42,7 +57,7 @@ class AdService {
   }
 
   static void _loadInterstitial() {
-    if (!AdConfig.releaseConfigured) return;
+    if (!adsAllowed || !AdConfig.releaseConfigured) return;
     InterstitialAd.load(
       adUnitId: AdConfig.interstitial,
       request: const AdRequest(),
@@ -54,6 +69,7 @@ class AdService {
   }
 
   static void meaningfulAction() {
+    if (!adsAllowed) return;
     _actions++;
     if (_actions >= 6 && _interstitial != null) {
       final ad = _interstitial!;
@@ -77,7 +93,7 @@ class AdService {
     required void Function() onReward,
     required void Function() onUnavailable,
   }) {
-    if (!AdConfig.releaseConfigured) {
+    if (!adsAllowed || !AdConfig.releaseConfigured) {
       onUnavailable();
       return;
     }

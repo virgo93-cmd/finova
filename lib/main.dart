@@ -8,9 +8,18 @@ import 'package:finova/features/state/finova_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+const _supabaseUrl = 'https://bgdgvthrukltamgfysxl.supabase.co';
+const _supabasePublishableKey =
+    'sb_publishable_DCzEUfrLSmhcqlChWTsZcQ_JpJTvinM';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: _supabaseUrl,
+    publishableKey: _supabasePublishableKey,
+  );
   final preferences = await SharedPreferences.getInstance();
   final database = FinovaDatabase();
   await database.open();

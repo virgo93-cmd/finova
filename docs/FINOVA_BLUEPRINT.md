@@ -1,29 +1,30 @@
 # Finova Blueprint
 
-## Product and architecture
+## Product direction
 
-Finova is a local-first personal finance and productivity application. Flutter and Material 3 provide the client, Riverpod owns reactive state, and SQLite (`sqflite`) is the durable source of truth. The application is feature-oriented, with shared domain models, calculation services, database repository, theme, and monetization infrastructure under `core`.
+Finova is an Indonesian-first, local-first personal finance and productivity app. Core records work offline. Accounts are optional and unlock private Google Drive backup plus server-authoritative premium access.
 
-Money is stored as integer minor units. For IDR the UI treats the integer as whole rupiah. Dates are stored as ISO-8601 strings. Database schema version 1 includes categories, transactions, budgets, tasks, habits, habit logs, goals, and settings. Default categories are protected by a `is_system` flag.
+## Architecture
 
-## Navigation and state
+- Flutter + Material 3 for Android, with Riverpod state and SQLite persistence.
+- `FinovaDatabase` owns local records and schema migrations.
+- Feature controllers expose typed application state; widgets do not issue SQL.
+- Supabase Auth and `finova_profiles` hold identity, profile metadata, and premium entitlement only. Financial records are not silently uploaded to Supabase.
+- Google Drive `appDataFolder` stores an explicit user-created JSON backup inaccessible to other Drive apps.
+- Lemon Squeezy checkout carries the Supabase user UUID as custom data. A Vercel webhook verifies HMAC before granting 30 days of premium.
+- Premium state is always read from Supabase. Clients cannot update entitlement fields. Premium disables all AdMob placements globally.
 
-The login-free flow is onboarding/setup followed by a four-destination shell: Home, Transactions, Productivity, and Insights. A central quick-action button opens expense, income, task, and habit entry. Riverpod exposes one controller coordinating repositories and immutable snapshots; calculation logic remains in pure services for testability.
+## Data safety
 
-## Monetization and privacy
+- Backup files are schema-versioned and include all user-created local tables and preferences.
+- Restore is explicit, confirmed, transactional, and replaces local records.
+- Secret keys exist only in Vercel environment variables. The APK contains only public OAuth/Supabase identifiers.
+- Development builds use official Google test ads; release builds use the supplied production units.
 
-AdMob is centralized in configuration, a service, and reusable ad widgets. Debug/profile builds always use Google's official Android test ad IDs. Release IDs are centrally configured and may be overridden with `--dart-define`. Interstitial eligibility is frequency-capped. Rewarded ads are user-initiated and unlock an extra insight; Finova does not use rewarded-interstitial, native, or app-open ads. Core records remain on-device.
+## Main modules
 
-## Release configuration
+Dashboard, transactions/categories, budgets, debts/receivables, tasks, habits, goals, insights, account/profile, backup/restore, premium, settings, notifications, and policy-conscious ads.
 
-Required external values remaining: privacy policy URL, Play signing key, and store metadata. Production Android AdMob App, Banner, and Interstitial IDs are configured. Never commit secrets.
+## Release flow
 
-## Release checklist
-
-- [ ] Set production AdMob app/ad-unit IDs
-- [ ] Verify UMP consent flow for release regions
-- [ ] Publish and configure privacy policy and terms URLs
-- [ ] Generate and configure release signing key
-- [ ] Create Play Store listing and final launcher assets
-- [ ] Test signed release build and policy-compliant ads
-- [ ] Review permissions, offline behavior, accessibility, and data reset
+Analyze and test, build signed APK, install on a physical device, validate auth/backup/payment/ad behavior, copy the verified APK to the landing page, then deploy Vercel with webhook environment variables.

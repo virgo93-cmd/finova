@@ -10,7 +10,9 @@ import {
   Check,
   CheckCircle2,
   ChevronRight,
+  CloudCog,
   Coins,
+  Crown,
   EyeOff,
   Globe2,
   HandCoins,
@@ -22,7 +24,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
-const downloadUrl = "/downloads/finova-android-v1.1.0.apk";
+const downloadUrl = "/downloads/finova-android-v2.0.0.apk";
 
 const currencies = ["IDR", "USD", "EUR", "GBP", "SGD", "MYR"];
 
@@ -39,7 +41,7 @@ const indonesian: Record<string, string> = {
   "Finova brings personal finance and daily productivity into one calm, private workspace—so you can understand your money and move your plans forward.": "Finova menyatukan keuangan pribadi dan produktivitas harian dalam satu ruang yang tenang dan privat—agar Anda memahami uang dan menjalankan rencana dengan lebih baik.",
   "Download for Android": "Unduh untuk Android",
   "Explore features": "Lihat fitur",
-  "No sign-up": "Tanpa pendaftaran",
+  "Optional account": "Akun opsional",
   "Local-first data": "Data tersimpan lokal",
   "Multi-currency": "Multi-mata uang",
   "Display currency": "Mata uang tampilan",
@@ -62,8 +64,13 @@ const indonesian: Record<string, string> = {
   "Money and productivity together": "Keuangan dan produktivitas bersama",
   "6 currencies": "6 mata uang",
   "Choose the format that fits you": "Pilih format yang sesuai untuk Anda",
-  "0 accounts": "Tanpa akun",
-  "Start without creating a profile": "Mulai tanpa membuat profil",
+  "Works offline; sign in only for backup": "Tetap berjalan offline; masuk hanya untuk backup",
+  "Private cloud backup": "Backup cloud pribadi",
+  "Back up on your terms.": "Backup sesuai pilihan Anda.",
+  "Your local records stay offline until you explicitly back them up to Finova's private app folder in your own Google Drive.": "Catatan lokal tetap offline sampai Anda memilih untuk membackupnya ke folder aplikasi pribadi Finova di Google Drive milik Anda.",
+  "Finova Premium": "Finova Premium",
+  "Thirty calm, ad-free days.": "Tiga puluh hari tenang tanpa iklan.",
+  "Buy 30 days of Premium securely through Lemon Squeezy. Active Premium removes every Finova ad automatically.": "Beli Premium 30 hari dengan aman melalui Lemon Squeezy. Premium aktif otomatis menghapus seluruh iklan Finova.",
   "Designed for real life": "Dirancang untuk kehidupan nyata",
   "Everything important,": "Semua yang penting,",
   "without the clutter.": "tanpa kerumitan.",
@@ -99,14 +106,14 @@ const indonesian: Record<string, string> = {
   "Malaysian Ringgit": "Ringgit Malaysia",
   "Privacy by design": "Privasi sejak awal",
   "Your personal records stay personal.": "Catatan pribadi Anda tetap pribadi.",
-  "Finova is designed to work without an account. Your financial entries and productivity data are stored on your device, while ads use Google AdMob.": "Finova dirancang untuk bekerja tanpa akun. Catatan keuangan dan data produktivitas disimpan di perangkat Anda, sedangkan iklan menggunakan Google AdMob.",
+  "Finova works offline without an account. Optional Google sign-in enables a backup in your private Drive app folder. Free users may see Google AdMob; active Premium removes ads.": "Finova berjalan offline tanpa akun. Login Google opsional mengaktifkan backup di folder aplikasi Drive pribadi Anda. Pengguna gratis dapat melihat Google AdMob; Premium aktif menghapus iklan.",
   "Read our Privacy Policy": "Baca Kebijakan Privasi",
   "Available now for Android": "Tersedia sekarang untuk Android",
   "A clearer day starts": "Hari yang lebih terarah dimulai",
   "with one small check-in.": "dari satu langkah kecil.",
   "Download the official Finova APK directly and install it on your Android device.": "Unduh APK resmi Finova secara langsung dan pasang di perangkat Android Anda.",
   "Download Finova APK": "Unduh APK Finova",
-  "Version 1.1.0 · Android only · 64 MB": "Versi 1.1.0 · Khusus Android · 64 MB",
+  "Version 2.0.0 · Android only · 67 MB": "Versi 2.0.0 · Khusus Android · 67 MB",
   "Money clarity. Everyday momentum.": "Keuangan lebih jelas. Hidup lebih terarah.",
   "Terms": "Ketentuan",
   "© 2026 Finova. All rights reserved.": "© 2026 Finova. Seluruh hak dilindungi.",
@@ -203,7 +210,7 @@ export default function Home() {
             </div>
 
             <div className="hero-trust">
-              <span><CheckCircle2 size={17} /> No sign-up</span>
+              <span><CheckCircle2 size={17} /> Optional account</span>
               <span><CheckCircle2 size={17} /> Local-first data</span>
               <span><CheckCircle2 size={17} /> Multi-currency</span>
             </div>
@@ -272,7 +279,7 @@ export default function Home() {
         <div className="container signal-grid">
           <div><strong>One app</strong><span>Money and productivity together</span></div>
           <div><strong>6 currencies</strong><span>Choose the format that fits you</span></div>
-          <div><strong>0 accounts</strong><span>Start without creating a profile</span></div>
+          <div><strong>Optional account</strong><span>Works offline; sign in only for backup</span></div>
         </div>
       </section>
 
@@ -336,6 +343,20 @@ export default function Home() {
             </div>
             <p>Record due dates, partial payments, remaining balances, and settled status in one clear place.</p>
           </article>
+
+          <article className="bento-card">
+            <div className="bento-icon"><CloudCog size={24} /></div>
+            <span>Private cloud backup</span>
+            <h3>Back up on your terms.</h3>
+            <p>Your local records stay offline until you explicitly back them up to Finova&apos;s private app folder in your own Google Drive.</p>
+          </article>
+
+          <article className="bento-card bento-mint">
+            <div className="bento-icon"><Crown size={24} /></div>
+            <span>Finova Premium</span>
+            <h3>Thirty calm, ad-free days.</h3>
+            <p>Buy 30 days of Premium securely through Lemon Squeezy. Active Premium removes every Finova ad automatically.</p>
+          </article>
         </div>
       </section>
 
@@ -379,14 +400,15 @@ export default function Home() {
           <div className="privacy-visual">
             <div className="shield-ring"><ShieldCheck size={50} /></div>
             <div className="privacy-chip chip-one"><LockKeyhole size={15} /> Local-first</div>
-            <div className="privacy-chip chip-two"><EyeOff size={15} /> No sign-up</div>
+            <div className="privacy-chip chip-two"><EyeOff size={15} /> Optional account</div>
           </div>
           <div className="privacy-copy">
             <span className="section-kicker">Privacy by design</span>
             <h2>Your personal records stay personal.</h2>
             <p>
-              Finova is designed to work without an account. Your financial entries and
-              productivity data are stored on your device, while ads use Google AdMob.
+              Finova works offline without an account. Optional Google sign-in enables a
+              backup in your private Drive app folder. Free users may see Google AdMob;
+              active Premium removes ads.
             </p>
             <Link href="/privacy">Read our Privacy Policy <ArrowRight size={17} /></Link>
           </div>
@@ -406,7 +428,7 @@ export default function Home() {
             <ArrowDownToLine size={20} />
             Download Finova APK
           </Link>
-          <small>Version 1.1.0 · Android only · 64 MB</small>
+          <small>Version 2.0.0 · Android only · 67 MB</small>
         </div>
       </section>
 

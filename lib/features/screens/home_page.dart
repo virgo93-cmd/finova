@@ -3,6 +3,7 @@ import 'package:finova/core/services/calculations.dart';
 import 'package:finova/core/utils/formatters.dart';
 import 'package:finova/core/widgets/common_widgets.dart';
 import 'package:finova/features/screens/finance_screens.dart';
+import 'package:finova/features/screens/goals_screen.dart';
 import 'package:finova/features/screens/productivity_screens.dart';
 import 'package:finova/features/screens/settings_page.dart';
 import 'package:finova/features/state/finova_controller.dart';
@@ -38,6 +39,16 @@ class HomePage extends ConsumerWidget {
                   budget.month.month == now.month,
             )
             .firstOrNull;
+        final spendingTrend = List<int>.generate(7, (index) {
+          final day = dateOnly(now.subtract(Duration(days: 6 - index)));
+          return state.transactions
+              .where(
+                (item) =>
+                    item.type == TransactionType.expense &&
+                    dateOnly(item.date) == day,
+              )
+              .fold(0, (sum, item) => sum + item.amount);
+        });
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () =>
@@ -123,6 +134,10 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                const SectionTitle('Tren pengeluaran 7 hari'),
+                const SizedBox(height: 10),
+                _SpendingChart(values: spendingTrend),
+                const SizedBox(height: 24),
                 SectionTitle(
                   'Anggaran bulanan',
                   action: overall == null ? 'Atur anggaran' : 'Ubah',
@@ -207,6 +222,45 @@ class HomePage extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                SectionTitle(
+                  'Target keuangan',
+                  action: 'Lihat semua',
+                  onAction: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const GoalsPage()),
+                  ),
+                ),
+                if (state.goals.isEmpty)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.flag_outlined),
+                    ),
+                    title: const Text('Mulai target tabungan'),
+                    subtitle: const Text(
+                      'Pantau progres tujuan keuangan Anda.',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => GoalFormPage.show(context),
+                  )
+                else
+                  Card(
+                    child: ListTile(
+                      leading: const CircleAvatar(child: Icon(Icons.flag)),
+                      title: Text(state.goals.first.title),
+                      subtitle: LinearProgressIndicator(
+                        value: state.goals.first.progress,
+                      ),
+                      trailing: Text(
+                        '${(state.goals.first.progress * 100).round()}%',
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const GoalsPage()),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 const SectionTitle('Transaksi terbaru'),
                 if (state.transactions.isEmpty)
@@ -305,6 +359,78 @@ class HomePage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SpendingChart extends StatelessWidget {
+  const _SpendingChart({required this.values});
+  final List<int> values;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxValue = values.fold(0, (a, b) => a > b ? a : b);
+    return Semantics(
+      label: 'Grafik pengeluaran tujuh hari terakhir',
+      child: Container(
+        height: 150,
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: maxValue == 0
+            ? const Center(child: Text('Belum ada pengeluaran dalam 7 hari.'))
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: List.generate(values.length, (index) {
+                  final ratio = values[index] / maxValue;
+                  final day = DateTime.now().subtract(
+                    Duration(days: 6 - index),
+                  );
+                  const labels = [
+                    'Sen',
+                    'Sel',
+                    'Rab',
+                    'Kam',
+                    'Jum',
+                    'Sab',
+                    'Min',
+                  ];
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: FractionallySizedBox(
+                                heightFactor: ratio.clamp(.04, 1),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            labels[day.weekday - 1],
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
       ),
     );
   }

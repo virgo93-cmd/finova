@@ -3,6 +3,16 @@ import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
 class FinovaDatabase {
+  static const backupTables = <String>[
+    'categories',
+    'transactions',
+    'budgets',
+    'tasks',
+    'habits',
+    'habit_logs',
+    'goals',
+    'debts',
+  ];
   Database? _database;
   Database get db => _database!;
 
@@ -479,17 +489,86 @@ class FinovaDatabase {
     await db.delete('debts', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<List<SavingsGoal>> goals() async {
+    final rows = await db.query('goals', orderBy: 'target_date, id DESC');
+    return rows
+        .map(
+          (row) => SavingsGoal(
+            id: row['id'] as int,
+            title: row['title'] as String,
+            targetAmount: row['target_amount'] as int,
+            currentAmount: row['current_amount'] as int,
+            targetDate: row['target_date'] == null
+                ? null
+                : DateTime.parse(row['target_date'] as String),
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> saveGoal({
+    int? id,
+    required String title,
+    required int targetAmount,
+    required int currentAmount,
+    DateTime? targetDate,
+  }) async {
+    if (title.trim().isEmpty || targetAmount <= 0) {
+      throw ArgumentError('Nama dan target wajib diisi.');
+    }
+    final values = {
+      'title': title.trim(),
+      'target_amount': targetAmount,
+      'current_amount': currentAmount.clamp(0, targetAmount),
+      'target_date': targetDate?.toIso8601String(),
+    };
+    if (id == null) {
+      await db.insert('goals', values);
+    } else {
+      await db.update('goals', values, where: 'id = ?', whereArgs: [id]);
+    }
+  }
+
+  Future<void> deleteGoal(int id) async {
+    await db.delete('goals', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<Map<String, List<Map<String, Object?>>>> exportData() async {
+    final result = <String, List<Map<String, Object?>>>{};
+    for (final table in backupTables) {
+      result[table] = await db.query(table);
+    }
+    return result;
+  }
+
+  Future<void> importData(Map<String, dynamic> source) async {
+    await db.transaction((txn) async {
+      await txn.execute('PRAGMA defer_foreign_keys = ON');
+      for (final table in backupTables.reversed) {
+        await txn.delete(table);
+      }
+      for (final table in backupTables) {
+        final rows = source[table];
+        if (rows is! List) {
+          throw const FormatException('Isi backup tidak lengkap.');
+        }
+        for (final row in rows) {
+          if (row is! Map) {
+            throw const FormatException('Baris backup tidak valid.');
+          }
+          await txn.insert(
+            table,
+            Map<String, Object?>.from(row),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+  }
+
   Future<void> resetAll() async {
     await db.transaction((txn) async {
-      for (final table in [
-        'transactions',
-        'budgets',
-        'tasks',
-        'habit_logs',
-        'habits',
-        'goals',
-        'debts',
-      ]) {
+      for (final table in backupTables.where((x) => x != 'categories')) {
         await txn.delete(table);
       }
       await txn.delete('categories', where: 'is_system = 0');

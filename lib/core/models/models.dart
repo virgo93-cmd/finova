@@ -130,6 +130,26 @@ class DebtRecord {
   bool get isSettled => remaining == 0;
 }
 
+class SavingsGoal {
+  const SavingsGoal({
+    required this.id,
+    required this.title,
+    required this.targetAmount,
+    required this.currentAmount,
+    this.targetDate,
+  });
+
+  final int id;
+  final String title;
+  final int targetAmount;
+  final int currentAmount;
+  final DateTime? targetDate;
+
+  double get progress =>
+      targetAmount <= 0 ? 0 : (currentAmount / targetAmount).clamp(0, 1);
+  int get remaining => (targetAmount - currentAmount).clamp(0, targetAmount);
+}
+
 class FinovaSettings {
   const FinovaSettings({
     this.currency = 'IDR',

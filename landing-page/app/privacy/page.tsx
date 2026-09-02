@@ -20,10 +20,16 @@ export default function PrivacyPage() {
         <p className="legal-updated">Effective September 2, 2026</p>
         <article>
           <h2>Overview</h2>
-          <p>Finova is a personal finance and productivity app. Core information you enter—including transactions, categories, budgets, tasks, habits, and preferences—is stored locally on your device. The current version of Finova does not require an account and does not send those core records to a server operated by Finova.</p>
+          <p>Finova is a personal finance and productivity app. Core information you enter—including transactions, categories, budgets, debts, goals, tasks, habits, and preferences—is stored locally on your device. An account is optional.</p>
 
           <h2>Data storage and deletion</h2>
           <p>Your records remain in the app&apos;s private device storage until you delete them, use the Reset all data feature, clear the app&apos;s storage, or uninstall Finova. These actions may permanently remove your information.</p>
+
+          <h2>Google account and Drive backup</h2>
+          <p>If you choose Google sign-in, Finova uses Supabase Auth to maintain your account identity and premium status. Finova requests the limited Google Drive app-data permission. Only when you press Backup does Finova upload a copy of your local records to its private application folder in your Google Drive. That folder is not shared with other Drive apps. You can replace the backup, restore it, or revoke Finova&apos;s Google access.</p>
+
+          <h2>Premium payments</h2>
+          <p>Premium checkout is provided by Lemon Squeezy. Finova sends your account identifier and pre-fills your email so a verified payment webhook can activate 30 days of ad-free access. Payment details are processed by Lemon Squeezy and are not stored inside the Finova app.</p>
 
           <h2>Advertising and consent</h2>
           <p>Finova uses the Google Mobile Ads SDK to show banner ads, limited interstitial ads, and user-initiated rewarded ads. Google and its partners may process an advertising identifier, IP address, device information, ad interactions, diagnostics, approximate network-based location, and consent choices under their own policies. Finova uses Google&apos;s consent mechanism where required.</p>

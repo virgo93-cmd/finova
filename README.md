@@ -7,7 +7,10 @@
 - One-time onboarding with currency and opening balance
 - SQLite-backed transaction/category CRUD, monthly and category budgets
 - Task CRUD, habit check-ins, real current/longest streak calculations
+- Debts/receivables, savings goals, and a seven-day dashboard spending chart
 - Finance and productivity insights from on-device records
+- Optional Google login with explicit private Drive backup and restore
+- 30-day Lemon Squeezy Premium entitlement with automatic global ad removal
 - Material 3 light/dark/system themes, empty states, data reset, privacy/about
 - Policy-conscious AdMob foundation with resilient banners, capped interstitials, and optional rewarded insights
 
@@ -53,3 +56,11 @@ Release mode suppresses ads if IDs are absent. The publisher must configure a re
 - Generate release signing key and configure Play signing
 - Add final launcher/store assets and listing
 - Test signed release, ads policy compliance, permissions, and offline mode
+
+## Premium backend
+
+The Vercel route `landing-page/app/api/webhook/route.ts` verifies Lemon Squeezy
+HMAC signatures and calls a service-role-only Supabase function. Configure
+`LEMON_SQUEEZY_WEBHOOK_SECRET`, `SUPABASE_URL`, and
+`SUPABASE_SERVICE_ROLE_KEY` in Vercel. Never expose the service-role key in the
+Flutter app or commit it to Git.

@@ -68,7 +68,8 @@ class _FinovaBannerAdState extends State<FinovaBannerAd> {
   @override
   void initState() {
     super.initState();
-    if (widget.enabled && AdConfig.releaseConfigured) {
+    AdService.premium.addListener(_premiumChanged);
+    if (widget.enabled && AdService.adsAllowed && AdConfig.releaseConfigured) {
       _ad = BannerAd(
         size: AdSize.banner,
         adUnitId: AdConfig.banner,
@@ -85,8 +86,17 @@ class _FinovaBannerAdState extends State<FinovaBannerAd> {
 
   @override
   void dispose() {
+    AdService.premium.removeListener(_premiumChanged);
     _ad?.dispose();
     super.dispose();
+  }
+
+  void _premiumChanged() {
+    if (!AdService.adsAllowed) {
+      _ad?.dispose();
+      _ad = null;
+      if (mounted) setState(() => _loaded = false);
+    }
   }
 
   @override

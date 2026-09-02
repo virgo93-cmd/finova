@@ -1,5 +1,6 @@
 import 'package:finova/core/models/models.dart';
 import 'package:finova/core/theme/finova_theme.dart';
+import 'package:finova/core/services/account_service.dart';
 import 'package:finova/features/onboarding/onboarding_page.dart';
 import 'package:finova/features/shell/main_shell.dart';
 import 'package:finova/features/state/finova_controller.dart';
@@ -11,6 +12,7 @@ class FinovaApp extends ConsumerWidget {
   const FinovaApp({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(accountProvider);
     final data = ref.watch(finovaControllerProvider);
     final mode = data.value?.settings.themeMode ?? AppThemeMode.system;
     return MaterialApp(
