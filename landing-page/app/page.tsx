@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { Children, cloneElement, isValidElement, useEffect, useState, type ReactElement, type ReactNode } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -23,8 +26,123 @@ const downloadUrl = "/downloads/finova-android-v1.0.0.apk";
 
 const currencies = ["IDR", "USD", "EUR", "GBP", "SGD", "MYR"];
 
+type Language = "id" | "en";
+
+const indonesian: Record<string, string> = {
+  "Features": "Fitur",
+  "Currencies": "Mata uang",
+  "Privacy": "Privasi",
+  "Download APK": "Unduh APK",
+  "Android app · Direct download": "Aplikasi Android · Unduh langsung",
+  "Money clarity.": "Keuangan lebih jelas.",
+  "Everyday momentum.": "Hidup lebih terarah.",
+  "Finova brings personal finance and daily productivity into one calm, private workspace—so you can understand your money and move your plans forward.": "Finova menyatukan keuangan pribadi dan produktivitas harian dalam satu ruang yang tenang dan privat—agar Anda memahami uang dan menjalankan rencana dengan lebih baik.",
+  "Download for Android": "Unduh untuk Android",
+  "Explore features": "Lihat fitur",
+  "No sign-up": "Tanpa pendaftaran",
+  "Local-first data": "Data tersimpan lokal",
+  "Multi-currency": "Multi-mata uang",
+  "Display currency": "Mata uang tampilan",
+  "Indonesian Rupiah": "Rupiah Indonesia",
+  "Savings goal": "Target tabungan",
+  "On track": "Sesuai target",
+  "Good morning": "Selamat pagi",
+  "Your overview": "Ringkasan Anda",
+  "Total balance": "Total saldo",
+  "8.4% saved this month": "8,4% ditabung bulan ini",
+  "Income": "Pemasukan",
+  "Expenses": "Pengeluaran",
+  "Spending insight": "Insight pengeluaran",
+  "September": "September",
+  "Today": "Hari ini",
+  "3 of 5 done": "3 dari 5 selesai",
+  "Review weekly budget": "Tinjau anggaran mingguan",
+  "Complete morning focus": "Selesaikan fokus pagi",
+  "One app": "Satu aplikasi",
+  "Money and productivity together": "Keuangan dan produktivitas bersama",
+  "6 currencies": "6 mata uang",
+  "Choose the format that fits you": "Pilih format yang sesuai untuk Anda",
+  "0 accounts": "Tanpa akun",
+  "Start without creating a profile": "Mulai tanpa membuat profil",
+  "Designed for real life": "Dirancang untuk kehidupan nyata",
+  "Everything important,": "Semua yang penting,",
+  "without the clutter.": "tanpa kerumitan.",
+  "A focused toolkit for the numbers you need to understand and the actions you want to complete.": "Perangkat yang fokus untuk memahami angka penting dan menyelesaikan hal yang ingin Anda capai.",
+  "Personal finance": "Keuangan pribadi",
+  "See where your money goes.": "Pahami ke mana uang Anda pergi.",
+  "Record income and expenses, organize categories, and monitor your balance at a glance.": "Catat pemasukan dan pengeluaran, atur kategori, dan pantau saldo dalam sekali lihat.",
+  "Coffee": "Kopi",
+  "Food & drink": "Makanan & minuman",
+  "Monthly income": "Pemasukan bulanan",
+  "Your currency, your view.": "Mata uang Anda, tampilan Anda.",
+  "Select a display currency that matches the way you manage money.": "Pilih mata uang tampilan yang sesuai dengan cara Anda mengelola keuangan.",
+  "Daily productivity": "Produktivitas harian",
+  "Turn intention into progress.": "Ubah niat menjadi kemajuan.",
+  "Keep tasks, habits, and daily priorities close to your financial goals.": "Satukan tugas, kebiasaan, dan prioritas harian dengan tujuan keuangan Anda.",
+  "Weekly focus": "Fokus mingguan",
+  "Clear insights": "Insight yang jelas",
+  "Patterns you can act on.": "Pola yang bisa ditindaklanjuti.",
+  "Simple summaries help you spot spending trends and make better next decisions.": "Ringkasan sederhana membantu Anda melihat tren pengeluaran dan mengambil keputusan yang lebih baik.",
+  "A calmer system": "Sistem yang lebih tenang",
+  "Built to help you check in, not get stuck configuring.": "Dibuat agar Anda langsung bergerak, bukan sibuk mengatur.",
+  "Finova keeps finance and focus in one lightweight Android experience.": "Finova menyatukan keuangan dan fokus dalam satu pengalaman Android yang ringan.",
+  "Multi-currency selection": "Pilihan multi-mata uang",
+  "Make every number feel familiar.": "Buat setiap angka terasa familiar.",
+  "Choose the currency used to format balances and transactions across Finova. Switch it anytime from settings—no new account or setup required.": "Pilih mata uang untuk memformat saldo dan transaksi di seluruh Finova. Ubah kapan saja melalui pengaturan—tanpa akun atau konfigurasi baru.",
+  "Currency selection controls display formatting; it does not convert exchange rates.": "Pilihan mata uang mengatur format tampilan; fitur ini tidak mengonversi nilai tukar.",
+  "Select currency": "Pilih mata uang",
+  "Settings": "Pengaturan",
+  "US Dollar": "Dolar AS",
+  "Euro": "Euro",
+  "British Pound": "Pound Inggris",
+  "Singapore Dollar": "Dolar Singapura",
+  "Malaysian Ringgit": "Ringgit Malaysia",
+  "Privacy by design": "Privasi sejak awal",
+  "Your personal records stay personal.": "Catatan pribadi Anda tetap pribadi.",
+  "Finova is designed to work without an account. Your financial entries and productivity data are stored on your device, while ads use Google AdMob.": "Finova dirancang untuk bekerja tanpa akun. Catatan keuangan dan data produktivitas disimpan di perangkat Anda, sedangkan iklan menggunakan Google AdMob.",
+  "Read our Privacy Policy": "Baca Kebijakan Privasi",
+  "Available now for Android": "Tersedia sekarang untuk Android",
+  "A clearer day starts": "Hari yang lebih terarah dimulai",
+  "with one small check-in.": "dari satu langkah kecil.",
+  "Download the official Finova APK directly and install it on your Android device.": "Unduh APK resmi Finova secara langsung dan pasang di perangkat Android Anda.",
+  "Download Finova APK": "Unduh APK Finova",
+  "Version 1.0.0 · Android only · 62 MB": "Versi 1.0.0 · Khusus Android · 62 MB",
+  "Money clarity. Everyday momentum.": "Keuangan lebih jelas. Hidup lebih terarah.",
+  "Terms": "Ketentuan",
+  "© 2026 Finova. All rights reserved.": "© 2026 Finova. Seluruh hak dilindungi.",
+};
+
+function localizeNode(node: ReactNode, language: Language): ReactNode {
+  if (language === "en") return node;
+  if (typeof node === "string") {
+    const trimmed = node.trim();
+    const translated = indonesian[trimmed];
+    return translated ? node.replace(trimmed, translated) : node;
+  }
+  if (Array.isArray(node)) return Children.map(node, (child) => localizeNode(child, language));
+  if (isValidElement(node)) {
+    const element = node as ReactElement<{ children?: ReactNode }>;
+    return cloneElement(element, {}, localizeNode(element.props.children, language));
+  }
+  return node;
+}
+
 export default function Home() {
-  return (
+  const [language, setLanguage] = useState<Language>("id");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("finova-language");
+    if (saved !== "en") return;
+    const timer = window.setTimeout(() => setLanguage("en"), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    window.localStorage.setItem("finova-language", language);
+  }, [language]);
+
+  return localizeNode((
     <main className="site-shell">
       <div className="hero-wrap" id="top">
         <div className="hero-orb hero-orb-one" />
@@ -43,6 +161,11 @@ export default function Home() {
             <Link href="#currencies">Currencies</Link>
             <Link href="#privacy">Privacy</Link>
           </div>
+
+          <fieldset className="language-toggle" aria-label="Language selection">
+            <button type="button" className={language === "id" ? "active" : ""} onClick={() => setLanguage("id")} aria-pressed={language === "id"}>ID</button>
+            <button type="button" className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}>EN</button>
+          </fieldset>
 
           <Link className="button button-small button-light" href={downloadUrl} download>
             Download APK
@@ -301,5 +424,5 @@ export default function Home() {
         <small>© 2026 Finova. All rights reserved.</small>
       </footer>
     </main>
-  );
+  ), language) as ReactElement;
 }

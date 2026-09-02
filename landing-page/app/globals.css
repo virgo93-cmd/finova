@@ -51,6 +51,10 @@ button { font: inherit; }
 .brand-mark img { width: 100%; height: 100%; object-fit: cover; }
 .nav-links { display: flex; align-items: center; gap: 34px; color: rgba(255,255,255,.7); font-size: 14px; font-weight: 600; }
 .nav-links a:hover { color: white; }
+.language-toggle { display: flex; align-items: center; gap: 3px; min-width: 0; margin: 0; padding: 3px; border: 1px solid rgba(255,255,255,.14); border-radius: 11px; background: rgba(255,255,255,.06); }
+.language-toggle button { min-width: 35px; height: 31px; padding: 0 8px; border: 0; border-radius: 8px; color: rgba(255,255,255,.55); background: transparent; cursor: pointer; font-size: 10px; font-weight: 800; transition: color .2s ease, background .2s ease, box-shadow .2s ease; }
+.language-toggle button:hover { color: white; }
+.language-toggle button.active { color: #0a3b2a; background: #8ff2ce; box-shadow: 0 5px 14px rgba(40,216,156,.18); }
 .mobile-menu { display: none; border: 0; color: white; background: transparent; }
 
 .button { min-height: 51px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 21px; border-radius: 14px; font-size: 14px; font-weight: 750; transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
@@ -228,7 +232,7 @@ button { font: inherit; }
 
 @media (max-width: 720px) {
   .container { width: min(100% - 30px, 1180px); }
-  .nav { height: 72px; }.nav-links, .nav > .button { display: none; }.mobile-menu { display: block; }
+  .nav { height: 72px; }.nav-links, .nav > .button { display: none; }.mobile-menu { display: block; }.language-toggle { margin-left: auto; margin-right: 8px; }
   .hero { gap: 25px; padding-top: 70px; padding-bottom: 75px; }
   .hero h1 { font-size: 48px; }.hero-lead { font-size: 16px; }.hero-actions { width: 100%; }.hero-actions .button { width: 100%; }
   .hero-trust { justify-content: center; gap: 10px 15px; }
