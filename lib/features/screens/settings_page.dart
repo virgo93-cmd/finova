@@ -15,14 +15,14 @@ class SettingsPage extends ConsumerWidget {
     }
     final notifier = ref.read(finovaControllerProvider.notifier);
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: const Text('Pengaturan')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 40),
         children: [
-          _header(context, 'General'),
+          _header(context, 'Umum'),
           ListTile(
             leading: const Icon(Icons.currency_exchange),
-            title: const Text('Currency'),
+            title: const Text('Mata uang'),
             trailing: DropdownButton<String>(
               value: settings.currency,
               items: [
@@ -39,11 +39,20 @@ class SettingsPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
-            title: const Text('Theme'),
+            title: const Text('Tema'),
             trailing: DropdownButton<AppThemeMode>(
               value: settings.themeMode,
               items: AppThemeMode.values
-                  .map((x) => DropdownMenuItem(value: x, child: Text(x.name)))
+                  .map(
+                    (x) => DropdownMenuItem(
+                      value: x,
+                      child: Text(switch (x) {
+                        AppThemeMode.system => 'Sistem',
+                        AppThemeMode.light => 'Terang',
+                        AppThemeMode.dark => 'Gelap',
+                      }),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) =>
                   notifier.updateSettings(settings.copyWith(themeMode: v)),
@@ -51,8 +60,8 @@ class SettingsPage extends ConsumerWidget {
           ),
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined),
-            title: const Text('Reminders'),
-            subtitle: const Text('Daily review at 7:00 PM'),
+            title: const Text('Pengingat'),
+            subtitle: const Text('Tinjauan harian pukul 19.00'),
             value: settings.notificationsEnabled,
             onChanged: (value) async {
               final allowed = await NotificationService.setDailyReminder(value);
@@ -62,16 +71,16 @@ class SettingsPage extends ConsumerWidget {
               if (!allowed && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Notification permission was not granted.'),
+                    content: Text('Izin notifikasi tidak diberikan.'),
                   ),
                 );
               }
             },
           ),
-          _header(context, 'Data & privacy'),
+          _header(context, 'Data & privasi'),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy Policy'),
+            title: const Text('Kebijakan Privasi'),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PrivacyPage()),
@@ -79,7 +88,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.gavel_outlined),
-            title: const Text('Terms of Use'),
+            title: const Text('Ketentuan Penggunaan'),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const TermsPage()),
@@ -91,25 +100,27 @@ class SettingsPage extends ConsumerWidget {
               color: Theme.of(context).colorScheme.error,
             ),
             title: Text(
-              'Reset all data',
+              'Hapus semua data',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
-            subtitle: const Text('Permanently removes local records and setup'),
+            subtitle: const Text(
+              'Menghapus permanen seluruh data lokal dan pengaturan',
+            ),
             onTap: () async {
               if (await confirmDelete(
                 context,
-                'Reset all Finova data? This cannot be undone.',
+                'Hapus seluruh data Finova? Tindakan ini tidak dapat dibatalkan.',
               )) {
                 await notifier.resetAll();
                 if (context.mounted) Navigator.pop(context);
               }
             },
           ),
-          _header(context, 'About'),
+          _header(context, 'Tentang'),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About Finova'),
-            subtitle: const Text('Track Money. Track Life.'),
+            title: const Text('Tentang Finova'),
+            subtitle: const Text('Keuangan tertata. Hidup terarah.'),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AboutPage()),
@@ -117,7 +128,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
-            title: const Text('Licenses'),
+            title: const Text('Lisensi'),
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'Finova',
@@ -144,27 +155,27 @@ class PrivacyPage extends StatelessWidget {
   const PrivacyPage({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Privacy')),
+    appBar: AppBar(title: const Text('Privasi')),
     body: ListView(
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          'Your data, kept simple',
+          'Data Anda, tetap sederhana',
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 16),
         const Text(
-          'Finova stores core financial and productivity data locally on your device. Finova does not require an account and does not upload these records to a Finova server.',
+          'Finova menyimpan data inti keuangan dan produktivitas secara lokal di perangkat Anda. Finova tidak memerlukan akun dan tidak mengunggah catatan tersebut ke server Finova.',
         ),
         const SizedBox(height: 16),
         const Text(
-          'The app can display advertisements using the Google Mobile Ads SDK. Google may process device and advertising information under its own terms. Where required, an applicable consent mechanism must be configured before release.',
+          'Aplikasi dapat menampilkan iklan menggunakan Google Mobile Ads SDK. Google dapat memproses informasi perangkat dan iklan sesuai kebijakannya. Mekanisme persetujuan diterapkan bila diwajibkan.',
         ),
         const SizedBox(height: 16),
         const Text(
-          'A public privacy policy URL and final legal text must be supplied by the publisher before Play Store release.',
+          'Kebijakan privasi publik tersedia melalui situs resmi Finova.',
         ),
       ],
     ),
@@ -175,33 +186,33 @@ class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Terms of Use')),
+    appBar: AppBar(title: const Text('Ketentuan Penggunaan')),
     body: ListView(
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          'Finova Terms of Use',
+          'Ketentuan Penggunaan Finova',
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
-        const Text('Effective September 2, 2026'),
+        const Text('Berlaku sejak 2 September 2026'),
         const SizedBox(height: 20),
         const Text(
-          'Finova provides personal recordkeeping, budgeting, task, habit, and informational summary tools. It is not a bank, accounting service, financial adviser, investment adviser, tax adviser, medical provider, or emergency service.',
+          'Finova menyediakan pencatatan pribadi, anggaran, tugas, kebiasaan, serta ringkasan informasi. Finova bukan bank, layanan akuntansi, penasihat keuangan, investasi, pajak, medis, atau layanan darurat.',
         ),
         const SizedBox(height: 16),
         const Text(
-          'You are responsible for the accuracy of your entries, protecting your device, keeping any backups you require, and using the app lawfully. Calculations may contain mistakes or omissions and must not be the sole basis for important decisions.',
+          'Anda bertanggung jawab atas keakuratan catatan, keamanan perangkat, cadangan data yang diperlukan, dan penggunaan aplikasi secara sah. Perhitungan tidak boleh menjadi satu-satunya dasar keputusan penting.',
         ),
         const SizedBox(height: 16),
         const Text(
-          'Core records are stored locally and may be lost if you reset the app, clear storage, uninstall it, lose the device, or encounter device failure. The app may display advertisements governed by third-party terms.',
+          'Catatan inti disimpan secara lokal dan dapat hilang bila aplikasi direset, penyimpanan dibersihkan, aplikasi dihapus, perangkat hilang, atau mengalami kerusakan. Iklan tunduk pada ketentuan pihak ketiga.',
         ),
         const SizedBox(height: 16),
         const Text(
-          'To the maximum extent permitted by law, Finova is provided “as is” and “as available.” Mandatory consumer rights remain unaffected. The complete publisher-ready terms are included with the project documentation.',
+          'Sejauh diizinkan hukum, Finova disediakan “sebagaimana adanya” dan “sebagaimana tersedia”. Hak konsumen yang wajib tetap berlaku.',
         ),
       ],
     ),
@@ -212,7 +223,7 @@ class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('About')),
+    appBar: AppBar(title: const Text('Tentang')),
     body: Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -230,12 +241,12 @@ class AboutPage extends StatelessWidget {
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
-          const Text('Track Money. Track Life.'),
+          const Text('Keuangan tertata. Hidup terarah.'),
           const SizedBox(height: 8),
-          const Text('Version 1.0.0'),
+          const Text('Versi 1.1.0'),
           const Spacer(),
           const Text(
-            'Built for calm, local-first money and productivity tracking.',
+            'Dibuat untuk pencatatan keuangan dan produktivitas yang tenang serta tersimpan lokal.',
             textAlign: TextAlign.center,
           ),
         ],

@@ -8,7 +8,12 @@ class FinovaDatabase {
 
   Future<void> open() async {
     final path = p.join(await getDatabasesPath(), 'finova.db');
-    _database = await openDatabase(path, version: 1, onCreate: _create);
+    _database = await openDatabase(
+      path,
+      version: 3,
+      onCreate: _create,
+      onUpgrade: _upgrade,
+    );
   }
 
   Future<void> _create(Database database, int version) async {
@@ -39,29 +44,71 @@ class FinovaDatabase {
     await database.execute(
       'CREATE TABLE settings(key TEXT PRIMARY KEY, value TEXT NOT NULL)',
     );
+    await _createDebtsTable(database);
     await _seedCategories(database);
   }
 
+  Future<void> _upgrade(
+    Database database,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    if (oldVersion < 2) await _createDebtsTable(database);
+    if (oldVersion < 3) await _translateSystemCategories(database);
+  }
+
+  Future<void> _translateSystemCategories(Database database) async {
+    const names = {
+      'Food': 'Makanan',
+      'Transport': 'Transportasi',
+      'Shopping': 'Belanja',
+      'Bills': 'Tagihan',
+      'Entertainment': 'Hiburan',
+      'Health': 'Kesehatan',
+      'Education': 'Pendidikan',
+      'Family': 'Keluarga',
+      'Travel': 'Perjalanan',
+      'Other': 'Lainnya',
+      'Salary': 'Gaji',
+      'Business': 'Bisnis',
+      'Freelance': 'Freelance',
+      'Investment': 'Investasi',
+      'Gift': 'Hadiah',
+    };
+    for (final entry in names.entries) {
+      await database.update(
+        'categories',
+        {'name': entry.value},
+        where: 'name = ? AND is_system = 1',
+        whereArgs: [entry.key],
+      );
+    }
+  }
+
+  Future<void> _createDebtsTable(Database database) => database.execute(
+    'CREATE TABLE debts(id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, person TEXT NOT NULL, amount INTEGER NOT NULL CHECK(amount > 0), paid_amount INTEGER NOT NULL DEFAULT 0 CHECK(paid_amount >= 0), due_date TEXT NOT NULL, note TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)',
+  );
+
   Future<void> _seedCategories(Database database) async {
     const expenses = {
-      'Food': 'restaurant',
-      'Transport': 'directions_car',
-      'Shopping': 'shopping_bag',
-      'Bills': 'receipt_long',
-      'Entertainment': 'movie',
-      'Health': 'health_and_safety',
-      'Education': 'school',
-      'Family': 'family_restroom',
-      'Travel': 'flight',
-      'Other': 'more_horiz',
+      'Makanan': 'restaurant',
+      'Transportasi': 'directions_car',
+      'Belanja': 'shopping_bag',
+      'Tagihan': 'receipt_long',
+      'Hiburan': 'movie',
+      'Kesehatan': 'health_and_safety',
+      'Pendidikan': 'school',
+      'Keluarga': 'family_restroom',
+      'Perjalanan': 'flight',
+      'Lainnya': 'more_horiz',
     };
     const incomes = {
-      'Salary': 'payments',
-      'Business': 'business_center',
+      'Gaji': 'payments',
+      'Bisnis': 'business_center',
       'Freelance': 'laptop',
-      'Investment': 'trending_up',
-      'Gift': 'redeem',
-      'Other': 'more_horiz',
+      'Investasi': 'trending_up',
+      'Hadiah': 'redeem',
+      'Lainnya': 'more_horiz',
     };
     for (final entry in expenses.entries) {
       await database.insert('categories', {
@@ -364,6 +411,74 @@ class FinovaDatabase {
     await db.delete('habits', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<List<DebtRecord>> debts() async {
+    final rows = await db.query('debts', orderBy: 'due_date, created_at DESC');
+    return rows
+        .map(
+          (r) => DebtRecord(
+            id: r['id'] as int,
+            type: DebtType.values.byName(r['type'] as String),
+            person: r['person'] as String,
+            amount: r['amount'] as int,
+            paidAmount: r['paid_amount'] as int,
+            dueDate: DateTime.parse(r['due_date'] as String),
+            note: r['note'] as String,
+            createdAt: DateTime.parse(r['created_at'] as String),
+            updatedAt: DateTime.parse(r['updated_at'] as String),
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> saveDebt({
+    int? id,
+    required DebtType type,
+    required String person,
+    required int amount,
+    required int paidAmount,
+    required DateTime dueDate,
+    required String note,
+  }) async {
+    if (amount <= 0 || person.trim().isEmpty) {
+      throw ArgumentError('Nama dan nominal wajib diisi.');
+    }
+    final now = DateTime.now().toIso8601String();
+    final values = {
+      'type': type.name,
+      'person': person.trim(),
+      'amount': amount,
+      'paid_amount': paidAmount.clamp(0, amount),
+      'due_date': DateTime(
+        dueDate.year,
+        dueDate.month,
+        dueDate.day,
+      ).toIso8601String(),
+      'note': note.trim(),
+      'updated_at': now,
+    };
+    if (id == null) {
+      await db.insert('debts', {...values, 'created_at': now});
+    } else {
+      await db.update('debts', values, where: 'id = ?', whereArgs: [id]);
+    }
+  }
+
+  Future<void> updateDebtPayment(int id, int paidAmount, int total) async {
+    await db.update(
+      'debts',
+      {
+        'paid_amount': paidAmount.clamp(0, total),
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteDebt(int id) async {
+    await db.delete('debts', where: 'id = ?', whereArgs: [id]);
+  }
+
   Future<void> resetAll() async {
     await db.transaction((txn) async {
       for (final table in [
@@ -373,6 +488,7 @@ class FinovaDatabase {
         'habit_logs',
         'habits',
         'goals',
+        'debts',
       ]) {
         await txn.delete(table);
       }

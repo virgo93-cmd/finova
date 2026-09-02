@@ -14,7 +14,7 @@ String formatMoney(int value, String currency) {
 
 String greeting() {
   final hour = DateTime.now().hour;
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'Selamat pagi';
+  if (hour < 18) return 'Selamat siang';
+  return 'Selamat malam';
 }

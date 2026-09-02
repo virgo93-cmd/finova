@@ -6,6 +6,8 @@ enum HabitFrequency { daily, selectedDays }
 
 enum AppThemeMode { system, light, dark }
 
+enum DebtType { payable, receivable }
+
 class Category {
   const Category({
     required this.id,
@@ -99,6 +101,33 @@ class Habit {
   final DateTime createdAt;
   final bool active;
   final Set<DateTime> logDates;
+}
+
+class DebtRecord {
+  const DebtRecord({
+    required this.id,
+    required this.type,
+    required this.person,
+    required this.amount,
+    required this.paidAmount,
+    required this.dueDate,
+    required this.note,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final int id;
+  final DebtType type;
+  final String person;
+  final int amount;
+  final int paidAmount;
+  final DateTime dueDate;
+  final String note;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  int get remaining => (amount - paidAmount).clamp(0, amount);
+  bool get isSettled => remaining == 0;
 }
 
 class FinovaSettings {

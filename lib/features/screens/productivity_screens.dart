@@ -29,7 +29,7 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Productivity',
+                  'Produktivitas',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -39,12 +39,12 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
                   segments: const [
                     ButtonSegment(
                       value: 0,
-                      label: Text('Tasks'),
+                      label: Text('Tugas'),
                       icon: Icon(Icons.task_alt),
                     ),
                     ButtonSegment(
                       value: 1,
-                      label: Text('Habits'),
+                      label: Text('Kebiasaan'),
                       icon: Icon(Icons.repeat),
                     ),
                   ],
@@ -65,12 +65,12 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
     if (s.tasks.isEmpty) {
       return EmptyState(
         icon: Icons.task_alt,
-        title: 'Your day is clear.',
-        message: 'Add a task when something comes up.',
+        title: 'Hari Anda masih kosong.',
+        message: 'Tambahkan tugas saat ada hal yang perlu dikerjakan.',
         action: FilledButton.icon(
           onPressed: () => TaskFormPage.show(context),
           icon: const Icon(Icons.add),
-          label: const Text('Add task'),
+          label: const Text('Tambah tugas'),
         ),
       );
     }
@@ -85,12 +85,12 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 110),
       children: [
-        Text('${done.length} of ${s.tasks.length} completed'),
+        Text('${done.length} dari ${s.tasks.length} selesai'),
         const SizedBox(height: 8),
         LinearProgressIndicator(value: taskCompletion(s.tasks)),
-        _taskSection('Today', open),
-        _taskSection('Upcoming', upcoming),
-        _taskSection('Completed', done),
+        _taskSection('Hari ini', open),
+        _taskSection('Mendatang', upcoming),
+        _taskSection('Selesai', done),
         FinovaBannerAd(enabled: s.settings.adsEnabled),
       ],
     );
@@ -109,7 +109,7 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
         ),
       ),
       if (tasks.isEmpty)
-        Text('Nothing here', style: Theme.of(context).textTheme.bodySmall)
+        Text('Belum ada data', style: Theme.of(context).textTheme.bodySmall)
       else
         ...tasks.map(
           (t) => ListTile(
@@ -131,7 +131,7 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
             onTap: () => TaskFormPage.show(context, item: t),
             trailing: IconButton(
               onPressed: () async {
-                if (await confirmDelete(context, 'Delete this task?')) {
+                if (await confirmDelete(context, 'Hapus tugas ini?')) {
                   ref.read(finovaControllerProvider.notifier).deleteTask(t.id);
                 }
               },
@@ -146,12 +146,12 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
     if (s.habits.isEmpty) {
       return EmptyState(
         icon: Icons.repeat,
-        title: 'Build your first habit.',
-        message: 'Small routines add up.',
+        title: 'Bangun kebiasaan pertama Anda.',
+        message: 'Rutinitas kecil menghasilkan perubahan besar.',
         action: FilledButton.icon(
           onPressed: () => HabitFormPage.show(context),
           icon: const Icon(Icons.add),
-          label: const Text('Add habit'),
+          label: const Text('Tambah kebiasaan'),
         ),
       );
     }
@@ -170,7 +170,7 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
               leading: CircleAvatar(child: Text(h.icon)),
               title: Text(h.title),
               subtitle: Text(
-                '${currentHabitStreak(h)} day streak • Best ${longestHabitStreak(h)}',
+                'Beruntun ${currentHabitStreak(h)} hari • Terbaik ${longestHabitStreak(h)}',
               ),
               trailing: Checkbox(
                 value: checked,
@@ -183,7 +183,7 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
               onLongPress: () async {
                 if (await confirmDelete(
                   context,
-                  'Delete this habit and its history?',
+                  'Hapus kebiasaan ini beserta riwayatnya?',
                 )) {
                   ref.read(finovaControllerProvider.notifier).deleteHabit(h.id);
                 }
@@ -240,8 +240,8 @@ class _TaskFormPageState extends ConsumerState<TaskFormPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(widget.item == null ? 'Add task' : 'Edit task'),
-      actions: [TextButton(onPressed: _save, child: const Text('Save'))],
+      title: Text(widget.item == null ? 'Tambah tugas' : 'Ubah tugas'),
+      actions: [TextButton(onPressed: _save, child: const Text('Simpan'))],
     ),
     body: ListView(
       padding: const EdgeInsets.all(20),
@@ -249,20 +249,29 @@ class _TaskFormPageState extends ConsumerState<TaskFormPage> {
         TextField(
           controller: title,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Task title'),
+          decoration: const InputDecoration(labelText: 'Judul tugas'),
         ),
         const SizedBox(height: 14),
         TextField(
           controller: notes,
           maxLines: 3,
-          decoration: const InputDecoration(labelText: 'Notes (optional)'),
+          decoration: const InputDecoration(labelText: 'Catatan (opsional)'),
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<TaskPriority>(
           initialValue: priority,
-          decoration: const InputDecoration(labelText: 'Priority'),
+          decoration: const InputDecoration(labelText: 'Prioritas'),
           items: TaskPriority.values
-              .map((v) => DropdownMenuItem(value: v, child: Text(v.name)))
+              .map(
+                (v) => DropdownMenuItem(
+                  value: v,
+                  child: Text(switch (v) {
+                    TaskPriority.low => 'Rendah',
+                    TaskPriority.medium => 'Sedang',
+                    TaskPriority.high => 'Tinggi',
+                  }),
+                ),
+              )
               .toList(),
           onChanged: (v) => setState(() => priority = v!),
         ),
@@ -272,7 +281,7 @@ class _TaskFormPageState extends ConsumerState<TaskFormPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Due date'),
+          title: const Text('Tenggat waktu'),
           subtitle: Text(DateFormat.yMMMd().format(due)),
           onTap: () async {
             final x = await showDatePicker(
@@ -343,8 +352,8 @@ class _HabitFormPageState extends ConsumerState<HabitFormPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(widget.item == null ? 'Add habit' : 'Edit habit'),
-      actions: [TextButton(onPressed: _save, child: const Text('Save'))],
+      title: Text(widget.item == null ? 'Tambah kebiasaan' : 'Ubah kebiasaan'),
+      actions: [TextButton(onPressed: _save, child: const Text('Simpan'))],
     ),
     body: ListView(
       padding: const EdgeInsets.all(20),
@@ -352,12 +361,12 @@ class _HabitFormPageState extends ConsumerState<HabitFormPage> {
         TextField(
           controller: title,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Habit name'),
+          decoration: const InputDecoration(labelText: 'Nama kebiasaan'),
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
           initialValue: icon,
-          decoration: const InputDecoration(labelText: 'Icon'),
+          decoration: const InputDecoration(labelText: 'Ikon'),
           items: [
             '✨',
             '💧',
@@ -372,10 +381,13 @@ class _HabitFormPageState extends ConsumerState<HabitFormPage> {
         const SizedBox(height: 14),
         SegmentedButton<HabitFrequency>(
           segments: const [
-            ButtonSegment(value: HabitFrequency.daily, label: Text('Daily')),
+            ButtonSegment(
+              value: HabitFrequency.daily,
+              label: Text('Setiap hari'),
+            ),
             ButtonSegment(
               value: HabitFrequency.selectedDays,
-              label: Text('Selected days'),
+              label: Text('Hari tertentu'),
             ),
           ],
           selected: {frequency},
@@ -438,7 +450,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
         children: [
           Text(
-            'Insights',
+            'Insight',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -446,8 +458,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
           const SizedBox(height: 14),
           SegmentedButton<int>(
             segments: const [
-              ButtonSegment(value: 0, label: Text('Finance')),
-              ButtonSegment(value: 1, label: Text('Productivity')),
+              ButtonSegment(value: 0, label: Text('Keuangan')),
+              ButtonSegment(value: 1, label: Text('Produktivitas')),
             ],
             selected: {tab},
             onSelectionChanged: (v) => setState(() => tab = v.first),
@@ -458,7 +470,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             children: [7, 30, 90]
                 .map(
                   (v) => ChoiceChip(
-                    label: Text('$v days'),
+                    label: Text('$v hari'),
                     selected: days == v,
                     onSelected: (_) => setState(() => days = v),
                   ),
@@ -480,16 +492,16 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   showDialog<void>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Extra insight'),
+                      title: const Text('Insight tambahan'),
                       content: Text(
                         summary.expense > summary.income
-                            ? 'Your expenses are above income in this period. Review the largest category and consider a tighter category budget.'
-                            : 'Your net cash flow is positive in this period. Consider directing part of the difference toward a goal or emergency buffer.',
+                            ? 'Pengeluaran Anda lebih besar daripada pemasukan pada periode ini. Tinjau kategori terbesar dan pertimbangkan anggaran yang lebih ketat.'
+                            : 'Arus kas bersih Anda positif pada periode ini. Pertimbangkan mengalokasikan sebagian selisih untuk tujuan atau dana darurat.',
                       ),
                       actions: [
                         FilledButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Done'),
+                          child: const Text('Selesai'),
                         ),
                       ],
                     ),
@@ -500,14 +512,14 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Rewarded ad is not available right now.'),
+                      content: Text('Iklan berbonus belum tersedia saat ini.'),
                     ),
                   );
                 }
               },
             ),
             icon: const Icon(Icons.ondemand_video_outlined),
-            label: const Text('Watch an ad for extra insight'),
+            label: const Text('Tonton iklan untuk insight tambahan'),
           ),
         ],
       ),
@@ -530,19 +542,19 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       return [
         const EmptyState(
           icon: Icons.insights_outlined,
-          title: 'Not enough data yet.',
-          message: 'Keep tracking and your insights will appear here.',
+          title: 'Data belum cukup.',
+          message: 'Terus lakukan pencatatan dan insight akan muncul di sini.',
         ),
       ];
     }
     return [
       _stats(c, [
-        ('Income', sum.income),
-        ('Expense', sum.expense),
-        ('Net', sum.balance),
+        ('Pemasukan', sum.income),
+        ('Pengeluaran', sum.expense),
+        ('Bersih', sum.balance),
       ], s.settings.currency),
       const SizedBox(height: 22),
-      const SectionTitle('Spending by category'),
+      const SectionTitle('Pengeluaran per kategori'),
       ...sorted.map(
         (e) => ListTile(
           contentPadding: EdgeInsets.zero,
@@ -564,18 +576,18 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         .length;
     return [
       _stats(c, [
-        ('Tasks done', tasks.where((t) => t.completed).length),
-        ('Task rate', (taskCompletion(tasks) * 100).round()),
-        ('Habit logs', logs),
+        ('Tugas selesai', tasks.where((t) => t.completed).length),
+        ('Rasio tugas', (taskCompletion(tasks) * 100).round()),
+        ('Catatan kebiasaan', logs),
       ], ''),
       const SizedBox(height: 22),
-      const SectionTitle('Active streaks'),
+      const SectionTitle('Rangkaian aktif'),
       ...s.habits.map(
         (h) => ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Text(h.icon, style: const TextStyle(fontSize: 24)),
           title: Text(h.title),
-          trailing: Text('${currentHabitStreak(h)} days'),
+          trailing: Text('${currentHabitStreak(h)} hari'),
         ),
       ),
     ];

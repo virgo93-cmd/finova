@@ -25,7 +25,7 @@ npm run build
 
 ## Required public endpoints
 
-- `/downloads/finova-android-v1.0.0.apk` — signed Android release APK
+- `/downloads/finova-android-v1.1.0.apk` — signed Android release APK
 - `/privacy` — Privacy Policy
 - `/terms` — Terms of Use
 - `/app-ads.txt` — AdMob authorized seller declaration

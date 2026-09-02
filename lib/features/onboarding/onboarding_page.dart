@@ -16,18 +16,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   static const _pages = [
     (
       Icons.account_balance_wallet_outlined,
-      'Track your money.',
-      'Capture income and spending in seconds.',
+      'Catat keuangan Anda.',
+      'Simpan pemasukan dan pengeluaran dalam hitungan detik.',
     ),
     (
       Icons.auto_awesome_outlined,
-      'Build better routines.',
-      'Tasks and habits, naturally part of your day.',
+      'Bangun rutinitas yang lebih baik.',
+      'Tugas dan kebiasaan menjadi bagian alami dari hari Anda.',
     ),
     (
       Icons.insights_outlined,
-      'See your progress.',
-      'Clear insights for money and momentum.',
+      'Lihat perkembangan Anda.',
+      'Insight yang jelas untuk keuangan dan produktivitas.',
     ),
   ];
   @override
@@ -98,7 +98,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 const Spacer(),
                 FilledButton(
                   onPressed: _next,
-                  child: Text(_page == 3 ? 'Start Finova' : 'Continue'),
+                  child: Text(_page == 3 ? 'Mulai Finova' : 'Lanjut'),
                 ),
               ],
             ),
@@ -111,17 +111,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     padding: const EdgeInsets.only(top: 80),
     children: [
       Text(
-        'A quick setup',
+        'Pengaturan singkat',
         style: Theme.of(
           context,
         ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
       const SizedBox(height: 8),
-      const Text('You can change these later in Settings.'),
+      const Text('Anda dapat mengubahnya nanti di Pengaturan.'),
       const SizedBox(height: 28),
       DropdownButtonFormField<String>(
         initialValue: _currency,
-        decoration: const InputDecoration(labelText: 'Currency'),
+        decoration: const InputDecoration(labelText: 'Mata uang'),
         items: [
           'IDR',
           'USD',
@@ -137,7 +137,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         controller: _balance,
         keyboardType: TextInputType.number,
         decoration: const InputDecoration(
-          labelText: 'Starting balance (optional)',
+          labelText: 'Saldo awal (opsional)',
           prefixIcon: Icon(Icons.savings_outlined),
         ),
       ),

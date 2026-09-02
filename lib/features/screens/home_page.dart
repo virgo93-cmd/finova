@@ -56,7 +56,7 @@ class HomePage extends ConsumerWidget {
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
-                          const Text("Here's your day at a glance."),
+                          const Text('Ringkasan aktivitas Anda hari ini.'),
                         ],
                       ),
                     ),
@@ -82,7 +82,7 @@ class HomePage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Current balance',
+                        'Saldo saat ini',
                         style: TextStyle(color: Colors.white70),
                       ),
                       const SizedBox(height: 6),
@@ -99,7 +99,7 @@ class HomePage extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: _metric(
-                              'Income this month',
+                              'Pemasukan bulan ini',
                               formatMoney(
                                 month.income,
                                 state.settings.currency,
@@ -109,7 +109,7 @@ class HomePage extends ConsumerWidget {
                           ),
                           Expanded(
                             child: _metric(
-                              'Expense this month',
+                              'Pengeluaran bulan ini',
                               formatMoney(
                                 month.expense,
                                 state.settings.currency,
@@ -124,16 +124,17 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 SectionTitle(
-                  'Monthly budget',
-                  action: overall == null ? 'Set budget' : 'Edit',
+                  'Anggaran bulanan',
+                  action: overall == null ? 'Atur anggaran' : 'Ubah',
                   onAction: () => BudgetFormPage.show(context),
                 ),
                 const SizedBox(height: 10),
                 if (overall == null)
                   const EmptyState(
                     icon: Icons.savings_outlined,
-                    title: 'Plan this month',
-                    message: 'Set a monthly budget to keep spending in view.',
+                    title: 'Rencanakan bulan ini',
+                    message:
+                        'Atur anggaran bulanan agar pengeluaran tetap terpantau.',
                   )
                 else
                   _budgetCard(
@@ -143,14 +144,14 @@ class HomePage extends ConsumerWidget {
                     state.settings.currency,
                   ),
                 const SizedBox(height: 24),
-                const SectionTitle('Quick actions'),
+                const SectionTitle('Aksi cepat'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _quick(
                       context,
                       Icons.remove,
-                      'Expense',
+                      'Pengeluaran',
                       () => TransactionFormPage.show(
                         context,
                         TransactionType.expense,
@@ -159,7 +160,7 @@ class HomePage extends ConsumerWidget {
                     _quick(
                       context,
                       Icons.add,
-                      'Income',
+                      'Pemasukan',
                       () => TransactionFormPage.show(
                         context,
                         TransactionType.income,
@@ -168,19 +169,19 @@ class HomePage extends ConsumerWidget {
                     _quick(
                       context,
                       Icons.task_alt,
-                      'Task',
+                      'Tugas',
                       () => TaskFormPage.show(context),
                     ),
                     _quick(
                       context,
                       Icons.repeat,
-                      'Habit',
+                      'Kebiasaan',
                       () => HabitFormPage.show(context),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                const SectionTitle('Productivity today'),
+                const SectionTitle('Produktivitas hari ini'),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(18),
@@ -193,7 +194,7 @@ class HomePage extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            '${today.where((task) => task.completed).length} of ${today.length} tasks completed',
+                            '${today.where((task) => task.completed).length} dari ${today.length} tugas selesai',
                           ),
                         ),
                         SizedBox(
@@ -207,12 +208,13 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const SectionTitle('Recent transactions'),
+                const SectionTitle('Transaksi terbaru'),
                 if (state.transactions.isEmpty)
                   const EmptyState(
                     icon: Icons.receipt_long_outlined,
-                    title: 'No transactions yet',
-                    message: 'Start by adding your first expense or income.',
+                    title: 'Belum ada transaksi',
+                    message:
+                        'Mulai dengan menambahkan pemasukan atau pengeluaran pertama.',
                   )
                 else
                   ...state.transactions
@@ -298,7 +300,7 @@ class HomePage extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${formatMoney((amount - spent).clamp(0, amount), currency)} remaining',
+                'Sisa ${formatMoney((amount - spent).clamp(0, amount), currency)}',
               ),
             ),
           ],

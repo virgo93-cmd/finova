@@ -1,5 +1,6 @@
 import 'package:finova/core/models/models.dart';
 import 'package:finova/features/screens/finance_screens.dart';
+import 'package:finova/features/screens/debt_screen.dart';
 import 'package:finova/features/screens/home_page.dart';
 import 'package:finova/features/screens/productivity_screens.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class _MainShellState extends State<MainShell> {
   static const _pages = [
     HomePage(),
     TransactionsPage(),
+    DebtPage(),
     ProductivityPage(),
     InsightsPage(),
   ];
@@ -28,19 +30,21 @@ class _MainShellState extends State<MainShell> {
         NavigationDestination(
           icon: Icon(Icons.home_outlined),
           selectedIcon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Beranda',
         ),
+        NavigationDestination(icon: Icon(Icons.swap_horiz), label: 'Transaksi'),
         NavigationDestination(
-          icon: Icon(Icons.swap_horiz),
-          label: 'Transactions',
+          icon: Icon(Icons.account_balance_wallet_outlined),
+          selectedIcon: Icon(Icons.account_balance_wallet),
+          label: 'Hutang',
         ),
         NavigationDestination(
           icon: Icon(Icons.check_circle_outline),
-          label: 'Productivity',
+          label: 'Aktivitas',
         ),
         NavigationDestination(
           icon: Icon(Icons.insights_outlined),
-          label: 'Insights',
+          label: 'Insight',
         ),
       ],
     ),
@@ -60,7 +64,7 @@ class _MainShellState extends State<MainShell> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Quick add', style: Theme.of(context).textTheme.titleLarge),
+            Text('Tambah cepat', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -69,7 +73,7 @@ class _MainShellState extends State<MainShell> {
                 _action(
                   sheet,
                   Icons.arrow_upward,
-                  'Expense',
+                  'Pengeluaran',
                   () => TransactionFormPage.show(
                     context,
                     TransactionType.expense,
@@ -78,21 +82,27 @@ class _MainShellState extends State<MainShell> {
                 _action(
                   sheet,
                   Icons.arrow_downward,
-                  'Income',
+                  'Pemasukan',
                   () =>
                       TransactionFormPage.show(context, TransactionType.income),
                 ),
                 _action(
                   sheet,
                   Icons.task_alt,
-                  'Task',
+                  'Tugas',
                   () => TaskFormPage.show(context),
                 ),
                 _action(
                   sheet,
                   Icons.repeat,
-                  'Habit',
+                  'Kebiasaan',
                   () => HabitFormPage.show(context),
+                ),
+                _action(
+                  sheet,
+                  Icons.handshake_outlined,
+                  'Hutang/Piutang',
+                  () => DebtFormPage.show(context),
                 ),
               ],
             ),

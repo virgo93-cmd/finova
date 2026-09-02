@@ -13,7 +13,7 @@ import {
   Coins,
   EyeOff,
   Globe2,
-  LayoutDashboard,
+  HandCoins,
   LockKeyhole,
   Menu,
   ShieldCheck,
@@ -22,7 +22,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
-const downloadUrl = "/downloads/finova-android-v1.0.0.apk";
+const downloadUrl = "/downloads/finova-android-v1.1.0.apk";
 
 const currencies = ["IDR", "USD", "EUR", "GBP", "SGD", "MYR"];
 
@@ -83,9 +83,9 @@ const indonesian: Record<string, string> = {
   "Clear insights": "Insight yang jelas",
   "Patterns you can act on.": "Pola yang bisa ditindaklanjuti.",
   "Simple summaries help you spot spending trends and make better next decisions.": "Ringkasan sederhana membantu Anda melihat tren pengeluaran dan mengambil keputusan yang lebih baik.",
-  "A calmer system": "Sistem yang lebih tenang",
-  "Built to help you check in, not get stuck configuring.": "Dibuat agar Anda langsung bergerak, bukan sibuk mengatur.",
-  "Finova keeps finance and focus in one lightweight Android experience.": "Finova menyatukan keuangan dan fokus dalam satu pengalaman Android yang ringan.",
+  "Debts & receivables": "Hutang & piutang",
+  "Never lose track of who owes what.": "Jangan kehilangan jejak siapa berhutang kepada siapa.",
+  "Record due dates, partial payments, remaining balances, and settled status in one clear place.": "Catat jatuh tempo, pembayaran sebagian, sisa saldo, dan status lunas dalam satu tempat yang jelas.",
   "Multi-currency selection": "Pilihan multi-mata uang",
   "Make every number feel familiar.": "Buat setiap angka terasa familiar.",
   "Choose the currency used to format balances and transactions across Finova. Switch it anytime from settings—no new account or setup required.": "Pilih mata uang untuk memformat saldo dan transaksi di seluruh Finova. Ubah kapan saja melalui pengaturan—tanpa akun atau konfigurasi baru.",
@@ -106,7 +106,7 @@ const indonesian: Record<string, string> = {
   "with one small check-in.": "dari satu langkah kecil.",
   "Download the official Finova APK directly and install it on your Android device.": "Unduh APK resmi Finova secara langsung dan pasang di perangkat Android Anda.",
   "Download Finova APK": "Unduh APK Finova",
-  "Version 1.0.0 · Android only · 62 MB": "Versi 1.0.0 · Khusus Android · 62 MB",
+  "Version 1.1.0 · Android only · 64 MB": "Versi 1.1.0 · Khusus Android · 64 MB",
   "Money clarity. Everyday momentum.": "Keuangan lebih jelas. Hidup lebih terarah.",
   "Terms": "Ketentuan",
   "© 2026 Finova. All rights reserved.": "© 2026 Finova. Seluruh hak dilindungi.",
@@ -329,12 +329,12 @@ export default function Home() {
           </article>
 
           <article className="bento-card bento-wide">
-            <div className="bento-icon"><LayoutDashboard size={24} /></div>
+            <div className="bento-icon"><HandCoins size={24} /></div>
             <div>
-              <span>A calmer system</span>
-              <h3>Built to help you check in, not get stuck configuring.</h3>
+              <span>Debts &amp; receivables</span>
+              <h3>Never lose track of who owes what.</h3>
             </div>
-            <p>Finova keeps finance and focus in one lightweight Android experience.</p>
+            <p>Record due dates, partial payments, remaining balances, and settled status in one clear place.</p>
           </article>
         </div>
       </section>
@@ -406,7 +406,7 @@ export default function Home() {
             <ArrowDownToLine size={20} />
             Download Finova APK
           </Link>
-          <small>Version 1.0.0 · Android only · 62 MB</small>
+          <small>Version 1.1.0 · Android only · 64 MB</small>
         </div>
       </section>
 

@@ -19,6 +19,7 @@ class FinovaState {
     required this.budgets,
     required this.tasks,
     required this.habits,
+    required this.debts,
     required this.settings,
   });
   final List<Category> categories;
@@ -26,6 +27,7 @@ class FinovaState {
   final List<Budget> budgets;
   final List<FinovaTask> tasks;
   final List<Habit> habits;
+  final List<DebtRecord> debts;
   final FinovaSettings settings;
 }
 
@@ -52,6 +54,7 @@ class FinovaController extends AsyncNotifier<FinovaState> {
     budgets: await _db.budgets(),
     tasks: await _db.tasks(),
     habits: await _db.habits(),
+    debts: await _db.debts(),
     settings: _settings(),
   );
   Future<void> refresh() async {
@@ -148,6 +151,28 @@ class FinovaController extends AsyncNotifier<FinovaState> {
   Future<void> toggleHabit(Habit habit) =>
       _mutate(() => _db.toggleHabitLog(habit, DateTime.now()));
   Future<void> deleteHabit(int id) => _mutate(() => _db.deleteHabit(id));
+  Future<void> saveDebt({
+    int? id,
+    required DebtType type,
+    required String person,
+    required int amount,
+    required int paidAmount,
+    required DateTime dueDate,
+    required String note,
+  }) => _mutate(
+    () => _db.saveDebt(
+      id: id,
+      type: type,
+      person: person,
+      amount: amount,
+      paidAmount: paidAmount,
+      dueDate: dueDate,
+      note: note,
+    ),
+  );
+  Future<void> updateDebtPayment(DebtRecord debt, int paidAmount) =>
+      _mutate(() => _db.updateDebtPayment(debt.id, paidAmount, debt.amount));
+  Future<void> deleteDebt(int id) => _mutate(() => _db.deleteDebt(id));
   Future<void> resetAll() async {
     await _db.resetAll();
     await _prefs.clear();

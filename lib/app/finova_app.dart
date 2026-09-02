@@ -4,6 +4,7 @@ import 'package:finova/features/onboarding/onboarding_page.dart';
 import 'package:finova/features/shell/main_shell.dart';
 import 'package:finova/features/state/finova_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FinovaApp extends ConsumerWidget {
@@ -15,6 +16,13 @@ class FinovaApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Finova',
+      locale: const Locale('id', 'ID'),
+      supportedLocales: const [Locale('id', 'ID')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: FinovaTheme.light(),
       darkTheme: FinovaTheme.dark(),
       themeMode: switch (mode) {
@@ -44,7 +52,7 @@ class _Startup extends StatelessWidget {
           : Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'Finova could not start.\n$error',
+                'Finova tidak dapat dibuka.\n$error',
                 textAlign: TextAlign.center,
               ),
             ),

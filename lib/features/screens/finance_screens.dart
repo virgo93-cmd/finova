@@ -61,7 +61,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     Row(
                       children: [
                         Text(
-                          'Transactions',
+                          'Transaksi',
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -76,16 +76,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       onChanged: (v) => setState(() => query = v),
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.search),
-                        hintText: 'Search transactions',
+                        hintText: 'Cari transaksi',
                       ),
                     ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
                         ...[
-                          (null, 'All'),
-                          (TransactionType.income, 'Income'),
-                          (TransactionType.expense, 'Expense'),
+                          (null, 'Semua'),
+                          (TransactionType.income, 'Pemasukan'),
+                          (TransactionType.expense, 'Pengeluaran'),
                         ].map(
                           (x) => Padding(
                             padding: const EdgeInsets.only(right: 6),
@@ -99,7 +99,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         const Spacer(),
                         DropdownButton<String>(
                           value: period,
-                          items: ['Week', 'Month']
+                          items: ['Minggu', 'Bulan']
                               .map(
                                 (x) =>
                                     DropdownMenuItem(value: x, child: Text(x)),
@@ -116,8 +116,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 child: filtered.isEmpty
                     ? const EmptyState(
                         icon: Icons.receipt_long_outlined,
-                        title: 'No transactions found',
-                        message: 'Adjust filters or add a new entry.',
+                        title: 'Transaksi tidak ditemukan',
+                        message: 'Ubah filter atau tambahkan catatan baru.',
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
@@ -239,12 +239,12 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${widget.item == null ? 'Add' : 'Edit'} ${widget.type.name}',
+          '${widget.item == null ? 'Tambah' : 'Ubah'} ${widget.type == TransactionType.income ? 'pemasukan' : 'pengeluaran'}',
         ),
         actions: [
           TextButton(
             onPressed: category == null ? null : _save,
-            child: const Text('Save'),
+            child: const Text('Simpan'),
           ),
         ],
       ),
@@ -259,14 +259,14 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
               context,
             ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w700),
             decoration: InputDecoration(
-              labelText: 'Amount',
+              labelText: 'Nominal',
               prefixText: '${state?.settings.currency ?? ''} ',
             ),
           ),
           const SizedBox(height: 20),
           DropdownButtonFormField<int>(
             initialValue: category,
-            decoration: const InputDecoration(labelText: 'Category'),
+            decoration: const InputDecoration(labelText: 'Kategori'),
             items: cats
                 .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))
                 .toList(),
@@ -275,7 +275,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
           const SizedBox(height: 14),
           TextField(
             controller: note,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            decoration: const InputDecoration(labelText: 'Catatan (opsional)'),
           ),
           const SizedBox(height: 14),
           ListTile(
@@ -283,7 +283,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
               borderRadius: BorderRadius.circular(16),
             ),
             tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            title: const Text('Date'),
+            title: const Text('Tanggal'),
             subtitle: Text(DateFormat.yMMMd().format(date)),
             trailing: const Icon(Icons.calendar_today),
             onTap: _pickDate,
@@ -308,7 +308,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
         int.tryParse(amount.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     if (value <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter an amount greater than zero.')),
+        const SnackBar(content: Text('Masukkan nominal lebih dari nol.')),
       );
       return;
     }
@@ -341,7 +341,7 @@ class TransactionDetailPage extends ConsumerWidget {
         ref.watch(finovaControllerProvider).value?.settings.currency ?? 'IDR';
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction'),
+        title: const Text('Transaksi'),
         actions: [
           IconButton(
             onPressed: () =>
@@ -350,7 +350,7 @@ class TransactionDetailPage extends ConsumerWidget {
           ),
           IconButton(
             onPressed: () async {
-              if (await confirmDelete(context, 'Delete this transaction?')) {
+              if (await confirmDelete(context, 'Hapus transaksi ini?')) {
                 await ref
                     .read(finovaControllerProvider.notifier)
                     .deleteTransaction(item.id);
@@ -379,7 +379,7 @@ class TransactionDetailPage extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.notes),
-              title: Text(item.note.isEmpty ? 'No note' : item.note),
+              title: Text(item.note.isEmpty ? 'Tanpa catatan' : item.note),
             ),
             ListTile(
               leading: const Icon(Icons.calendar_today),
@@ -396,16 +396,16 @@ Future<bool> confirmDelete(BuildContext context, String message) async =>
     await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Please confirm'),
+        title: const Text('Mohon konfirmasi'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Cancel'),
+            child: const Text('Batal'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Delete'),
+            child: const Text('Hapus'),
           ),
         ],
       ),
@@ -446,8 +446,8 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
         [];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Set budget'),
-        actions: [TextButton(onPressed: _save, child: const Text('Save'))],
+        title: const Text('Atur anggaran'),
+        actions: [TextButton(onPressed: _save, child: const Text('Simpan'))],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -456,16 +456,16 @@ class _BudgetFormPageState extends ConsumerState<BudgetFormPage> {
             controller: amount,
             autofocus: true,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Budget amount'),
+            decoration: const InputDecoration(labelText: 'Nominal anggaran'),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<int?>(
             initialValue: category,
-            decoration: const InputDecoration(labelText: 'Scope'),
+            decoration: const InputDecoration(labelText: 'Cakupan'),
             items: [
               const DropdownMenuItem(
                 value: null,
-                child: Text('Overall monthly budget'),
+                child: Text('Anggaran bulanan keseluruhan'),
               ),
               ...cats.map(
                 (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
@@ -500,7 +500,7 @@ class CategoriesPage extends ConsumerWidget {
     final cats = ref.watch(finovaControllerProvider).value?.categories ?? [];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories'),
+        title: const Text('Kategori'),
         actions: [
           IconButton(
             onPressed: () => _edit(context, ref),
@@ -529,7 +529,7 @@ class CategoriesPage extends ConsumerWidget {
                     ),
                     title: Text(c.name),
                     subtitle: Text(
-                      c.isSystem ? 'Built-in category' : 'Custom category',
+                      c.isSystem ? 'Kategori bawaan' : 'Kategori khusus',
                     ),
                     trailing: c.isSystem
                         ? null
@@ -539,7 +539,7 @@ class CategoriesPage extends ConsumerWidget {
                                 _edit(context, ref, item: c);
                               } else if (await confirmDelete(
                                 context,
-                                'Delete ${c.name}?',
+                                'Hapus ${c.name}?',
                               )) {
                                 try {
                                   await ref
@@ -550,7 +550,7 @@ class CategoriesPage extends ConsumerWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                          'This category is used by a transaction.',
+                                          'Kategori ini sedang digunakan oleh transaksi.',
                                         ),
                                       ),
                                     );
@@ -561,11 +561,11 @@ class CategoriesPage extends ConsumerWidget {
                             itemBuilder: (_) => const [
                               PopupMenuItem(
                                 value: 'rename',
-                                child: Text('Rename'),
+                                child: Text('Ubah nama'),
                               ),
                               PopupMenuItem(
                                 value: 'delete',
-                                child: Text('Delete'),
+                                child: Text('Hapus'),
                               ),
                             ],
                           ),
@@ -588,14 +588,14 @@ class CategoriesPage extends ConsumerWidget {
       context: context,
       builder: (c) => StatefulBuilder(
         builder: (c, set) => AlertDialog(
-          title: Text(item == null ? 'New category' : 'Rename category'),
+          title: Text(item == null ? 'Kategori baru' : 'Ubah nama kategori'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: text,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: const InputDecoration(labelText: 'Nama'),
               ),
               if (item == null) ...[
                 const SizedBox(height: 12),
@@ -614,11 +614,11 @@ class CategoriesPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Cancel'),
+              child: const Text('Batal'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(c, true),
-              child: const Text('Save'),
+              child: const Text('Simpan'),
             ),
           ],
         ),
