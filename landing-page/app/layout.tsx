@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://finova.ailooma.biz.id'),
   title: 'Finova — Money Clarity. Everyday Momentum.',
   description: 'Track money, budgets, tasks, and habits in one calm, local-first Android app with multi-currency selection.',
+  icons: {
+    icon: [{ url: '/brand/finova-icon.png', type: 'image/png' }],
+    shortcut: '/brand/finova-icon.png',
+    apple: '/brand/finova-icon.png',
+  },
   openGraph: { title: 'Finova — Money Clarity. Everyday Momentum.', description: 'Personal finance and daily productivity for Android, with multi-currency selection.', url: 'https://finova.ailooma.biz.id', siteName: 'Finova', images: [{ url: '/og.png', width: 1024, height: 500 }], locale: 'en_US', type: 'website' },
   twitter: { card: 'summary_large_image', title: 'Finova — Money Clarity. Everyday Momentum.', description: 'Personal finance and daily productivity for Android, with multi-currency selection.', images: ['/og.png'] },
 };
