@@ -35,7 +35,7 @@ npm run build
 ## Release file
 
 - Version: `2.2.0`
-- SHA-256: `D8FAFFDBB73F12F9D42675C1F628A8DDA5B5553A8F3814A530801390C69A086B`
+- SHA-256: `ACA39628D6FD13F920A646592B305F77E5383813FE255D43AFDF744BCE8A500C`
 
 When the APK changes, replace the file in `public/downloads`, update the version and checksum on the homepage, then run `npm run build` again.
 
@@ -47,3 +47,4 @@ Copy `.env.example` values into Vercel Environment Variables. Keep
 `LEMON_SQUEEZY_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` secret. Configure
 the Lemon Squeezy webhook URL as `https://finova.ailooma.biz.id/api/webhook` and
 subscribe to `order_created`.
+
