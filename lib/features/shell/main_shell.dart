@@ -48,11 +48,12 @@ class _MainShellState extends State<MainShell> {
         ),
       ],
     ),
-    floatingActionButton: FloatingActionButton(
+    floatingActionButton: FloatingActionButton.extended(
       onPressed: _quickActions,
-      child: const Icon(Icons.add),
+      icon: const Icon(Icons.add),
+      label: const Text('Tambah'),
     ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
   );
   void _quickActions() => showModalBottomSheet<void>(
     context: context,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:finova/core/models/models.dart';
 import 'package:finova/core/services/account_service.dart';
 import 'package:finova/core/services/auth_service.dart';
@@ -213,10 +215,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 children: [
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: avatar == null
+                      backgroundImage: account.localAvatarPath != null
+                          ? FileImage(File(account.localAvatarPath!))
+                          : avatar == null
                           ? null
                           : NetworkImage(avatar),
-                      child: avatar == null ? const Icon(Icons.person) : null,
+                      child: account.localAvatarPath == null && avatar == null
+                          ? const Icon(Icons.person)
+                          : null,
                     ),
                     title: Text(name),
                     subtitle: Text(user.email ?? 'Akun Google terhubung'),
@@ -267,10 +273,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   const SizedBox(height: 8),
                   if (!account.isPremium)
                     ListTile(
-                      leading: const Icon(Icons.workspace_premium_outlined),
-                      title: const Text('Finova Premium — 30 hari'),
+                      tileColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: .55),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: .35),
+                        ),
+                      ),
+                      leading: Icon(
+                        Icons.workspace_premium,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: Text(
+                        'Finova Premium — 30 hari',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
                       subtitle: const Text(
-                        'Nikmati Finova tanpa banner dan iklan interstisial.',
+                        'Nikmati pengalaman Finova yang lebih fokus dan nyaman selama 30 hari.',
                       ),
                       trailing: const Icon(Icons.open_in_new),
                       onTap: _authBusy ? null : _buyPremium,
@@ -375,7 +401,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
   Future<void> _editProfile(AccountState account) async {
     final controller = TextEditingController(text: account.displayName);
-    final name = await showDialog<String>(
+    final result = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Ubah profil'),
@@ -386,6 +412,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           decoration: const InputDecoration(labelText: 'Nama tampilan'),
         ),
         actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, '__photo__'),
+            icon: const Icon(Icons.photo_library_outlined),
+            label: const Text('Ganti foto'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Batal'),
@@ -398,9 +429,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
       ),
     );
     controller.dispose();
-    if (name == null || name.trim().isEmpty) return;
+    if (result == '__photo__') {
+      try {
+        await ref.read(accountProvider.notifier).updateAvatarFromGallery();
+        if (mounted) _showMessage('Foto profil berhasil diperbarui.');
+      } catch (error) {
+        if (mounted) _showMessage('Foto profil gagal diperbarui: $error');
+      }
+      return;
+    }
+    if (result == null || result.trim().isEmpty) return;
     try {
-      await ref.read(accountProvider.notifier).updateDisplayName(name);
+      await ref.read(accountProvider.notifier).updateDisplayName(result);
       if (mounted) _showMessage('Profil berhasil diperbarui.');
     } catch (error) {
       if (mounted) _showMessage('Profil gagal diperbarui: $error');
@@ -456,7 +496,7 @@ class PrivacyPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Aplikasi gratis dapat menampilkan banner dan iklan interstisial terbatas menggunakan Google Mobile Ads SDK. Google dapat memproses informasi perangkat dan iklan sesuai kebijakannya. Mekanisme persetujuan diterapkan bila diwajibkan.',
+          'Aplikasi dapat menggunakan layanan periklanan pihak ketiga. Google dapat memproses informasi perangkat sesuai kebijakannya. Mekanisme persetujuan diterapkan bila diwajibkan.',
         ),
         const SizedBox(height: 16),
         const Text(
@@ -528,7 +568,7 @@ class AboutPage extends StatelessWidget {
           ),
           const Text('Keuangan tertata. Hidup terarah.'),
           const SizedBox(height: 8),
-          const Text('Versi 2.1.0'),
+          const Text('Versi 2.2.0'),
           const Spacer(),
           const Text(
             'Dibuat untuk pencatatan keuangan dan produktivitas yang tenang serta tersimpan lokal.',

@@ -439,6 +439,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
   int tab = 0;
   int days = 30;
   int categoryType = 0;
+  bool _rewardUnlocked = false;
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(finovaControllerProvider).value;
@@ -525,6 +526,30 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         ('Pengeluaran', sum.expense),
         ('Bersih', sum.balance),
       ], s.settings.currency),
+      if (!s.settings.adsEnabled || _rewardUnlocked)
+        const SizedBox.shrink()
+      else ...[
+        const SizedBox(height: 14),
+        Card(
+          color: Theme.of(c).colorScheme.primaryContainer,
+          child: ListTile(
+            leading: const Icon(Icons.auto_awesome),
+            title: const Text('Buka insight lengkap'),
+            subtitle: const Text('Dapatkan ringkasan detail untuk sesi ini.'),
+            trailing: FilledButton(
+              onPressed: () => AdService.showRewarded(
+                onReward: () => setState(() => _rewardUnlocked = true),
+                onUnavailable: () => ScaffoldMessenger.of(c).showSnackBar(
+                  const SnackBar(
+                    content: Text('Fitur belum tersedia. Coba lagi nanti.'),
+                  ),
+                ),
+              ),
+              child: const Text('Buka'),
+            ),
+          ),
+        ),
+      ],
       const SizedBox(height: 22),
       const SectionTitle('Tren pemasukan & pengeluaran'),
       const SizedBox(height: 10),

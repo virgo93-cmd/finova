@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:finova/core/models/models.dart';
+import 'package:finova/core/services/account_service.dart';
 import 'package:finova/core/services/calculations.dart';
 import 'package:finova/core/utils/formatters.dart';
 import 'package:finova/core/widgets/common_widgets.dart';
@@ -28,6 +31,7 @@ class HomePage extends ConsumerWidget {
           initialBalance: state.settings.initialBalance,
         );
         final month = calculateFinance(monthItems);
+        final account = ref.watch(accountProvider).value;
         final today = state.tasks
             .where((task) => dateOnly(task.dueDate) == dateOnly(now))
             .toList();
@@ -102,6 +106,49 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundImage: account?.localAvatarPath != null
+                                ? FileImage(File(account!.localAvatarPath!))
+                                : account?.avatarUrl != null
+                                ? NetworkImage(account!.avatarUrl!)
+                                : null,
+                            child:
+                                account?.localAvatarPath == null &&
+                                    account?.avatarUrl == null
+                                ? const Icon(Icons.person_outline)
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  account?.displayName ?? 'Profil Finova',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  account?.isPremium == true
+                                      ? 'Premium aktif'
+                                      : 'Ringkasan keuangan Anda',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Saldo saat ini',
                         style: TextStyle(color: Colors.white70),

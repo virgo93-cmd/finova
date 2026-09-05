@@ -24,7 +24,7 @@ import {
   WalletCards,
 } from "lucide-react";
 
-const downloadUrl = "/downloads/finova-android-v2.1.0.apk";
+const downloadUrl = "/downloads/finova-android-v2.2.0.apk";
 
 const currencies = ["IDR", "USD", "EUR", "GBP", "SGD", "MYR"];
 
@@ -113,7 +113,7 @@ const indonesian: Record<string, string> = {
   "with one small check-in.": "dari satu langkah kecil.",
   "Download the official Finova APK directly and install it on your Android device.": "Unduh APK resmi Finova secara langsung dan pasang di perangkat Android Anda.",
   "Download Finova APK": "Unduh APK Finova",
-  "Version 2.1.0 · Android only · 67 MB": "Versi 2.1.0 · Khusus Android · 67 MB",
+  "Version 2.2.0 · Android only · 67 MB": "Versi 2.2.0 · Khusus Android · 67 MB",
   "Money clarity. Everyday momentum.": "Keuangan lebih jelas. Hidup lebih terarah.",
   "Terms": "Ketentuan",
   "© 2026 Finova. All rights reserved.": "© 2026 Finova. Seluruh hak dilindungi.",
@@ -428,7 +428,7 @@ export default function Home() {
             <ArrowDownToLine size={20} />
             Download Finova APK
           </Link>
-          <small>Version 2.1.0 · Android only · 67 MB</small>
+          <small>Version 2.2.0 · Android only · 67 MB</small>
         </div>
       </section>
 

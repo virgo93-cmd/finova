@@ -32,7 +32,7 @@ export default function TermsPage() {
           <p>Data may be lost if the app is reset, storage is cleared, Finova is uninstalled, the device is lost, or a failure occurs. Features may change or be discontinued. We do not guarantee uninterrupted or error-free operation.</p>
 
           <h2>Advertising and third-party services</h2>
-          <p>The free version may show banner ads, interstitial ads, and user-initiated rewarded ads through Google. Core tracking features remain available without watching rewarded ads. Third-party services are governed by their own terms and policies.</p>
+          <p>The free version may use third-party advertising services through Google. Some optional insight experiences may be unlocked for a limited session after completing the presented action. Core tracking features remain available without that optional access. Third-party services are governed by their own terms and policies.</p>
 
           <h2>Disclaimer and limitation of liability</h2>
           <p>To the extent permitted by law, Finova is provided “as is” and “as available.” Consumer rights that cannot lawfully be excluded remain unaffected. Finova is not liable for indirect loss, lost data, lost profits, or decisions made using the app to the extent permitted by law.</p>
