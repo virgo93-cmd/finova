@@ -1,4 +1,5 @@
 import 'package:finova/core/models/models.dart';
+import 'package:finova/core/services/account_service.dart';
 import 'package:finova/core/services/ad_service.dart';
 import 'package:finova/core/services/calculations.dart';
 import 'package:finova/core/utils/formatters.dart';
@@ -444,6 +445,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
   Widget build(BuildContext context) {
     final s = ref.watch(finovaControllerProvider).value;
     if (s == null) return const Center(child: CircularProgressIndicator());
+    final isPremium = ref.watch(accountProvider).value?.isPremium == true;
     final start = DateTime.now().subtract(Duration(days: days));
     final tx = s.transactions.where((t) => t.date.isAfter(start));
     final summary = calculateFinance(tx);
@@ -526,7 +528,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         ('Pengeluaran', sum.expense),
         ('Bersih', sum.balance),
       ], s.settings.currency),
-      if (!s.settings.adsEnabled || _rewardUnlocked)
+      if (!s.settings.adsEnabled || _rewardUnlocked || isPremium)
         const SizedBox.shrink()
       else ...[
         const SizedBox(height: 14),
