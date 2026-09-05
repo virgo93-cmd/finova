@@ -180,6 +180,14 @@ class _DebtCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final payments =
+        ref
+            .watch(finovaControllerProvider)
+            .value
+            ?.debtPayments
+            .where((entry) => entry.debtId == debt.id)
+            .toList() ??
+        const <DebtPayment>[];
     final overdue = !debt.isSettled && debt.dueDate.isBefore(DateTime.now());
     return Card(
       child: InkWell(
@@ -243,6 +251,8 @@ class _DebtCard extends ConsumerWidget {
                     onSelected: (value) async {
                       if (value == 'payment') {
                         _recordPayment(context, ref);
+                      } else if (value == 'history') {
+                        _showHistory(context, payments);
                       } else if (value == 'settle') {
                         await ref
                             .read(finovaControllerProvider.notifier)
@@ -255,6 +265,10 @@ class _DebtCard extends ConsumerWidget {
                       }
                     },
                     itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'history',
+                        child: Text('Riwayat cicilan (${payments.length})'),
+                      ),
                       if (!debt.isSettled)
                         const PopupMenuItem(
                           value: 'payment',
@@ -273,6 +287,55 @@ class _DebtCard extends ConsumerWidget {
                   ),
                 ],
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHistory(BuildContext context, List<DebtPayment> payments) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Riwayat cicilan · ${debt.person}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              if (payments.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 28),
+                  child: Center(child: Text('Belum ada pembayaran tercatat.')),
+                )
+              else
+                ...payments
+                    .take(12)
+                    .map(
+                      (entry) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.payments_outlined),
+                        ),
+                        title: Text(entry.note),
+                        subtitle: Text(
+                          DateFormat(
+                            'd MMM y, HH:mm',
+                            'id_ID',
+                          ).format(entry.date),
+                        ),
+                        trailing: Text(
+                          '${entry.amount >= 0 ? '+' : ''}${formatMoney(entry.amount, currency)}',
+                        ),
+                      ),
+                    ),
             ],
           ),
         ),

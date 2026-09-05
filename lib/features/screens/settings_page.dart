@@ -166,7 +166,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'Finova',
-              applicationVersion: '1.0.0',
+              applicationVersion: '2.1.0',
             ),
           ),
         ],
@@ -187,6 +187,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     final user = account.user;
     final name = account.displayName ?? user?.email ?? 'Pengguna Finova';
     final avatar = account.avatarUrl;
+    final lastBackup = DateTime.tryParse(
+      ref.read(preferencesProvider).getString('last_backup_at') ?? '',
+    );
 
     return Card(
       child: Padding(
@@ -232,6 +235,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     subtitle: const Text(
                       'Simpan seluruh data lokal ke folder pribadi Finova.',
                     ),
+                    trailing: lastBackup == null
+                        ? null
+                        : Text(
+                            _dateTime(lastBackup.toLocal()),
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -261,7 +270,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       leading: const Icon(Icons.workspace_premium_outlined),
                       title: const Text('Finova Premium — 30 hari'),
                       subtitle: const Text(
-                        'Nikmati Finova tanpa banner, interstisial, dan iklan reward.',
+                        'Nikmati Finova tanpa banner dan iklan interstisial.',
                       ),
                       trailing: const Icon(Icons.open_in_new),
                       onTap: _authBusy ? null : _buyPremium,
@@ -447,7 +456,7 @@ class PrivacyPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Aplikasi dapat menampilkan iklan menggunakan Google Mobile Ads SDK. Google dapat memproses informasi perangkat dan iklan sesuai kebijakannya. Mekanisme persetujuan diterapkan bila diwajibkan.',
+          'Aplikasi gratis dapat menampilkan banner dan iklan interstisial terbatas menggunakan Google Mobile Ads SDK. Google dapat memproses informasi perangkat dan iklan sesuai kebijakannya. Mekanisme persetujuan diterapkan bila diwajibkan.',
         ),
         const SizedBox(height: 16),
         const Text(
@@ -519,7 +528,7 @@ class AboutPage extends StatelessWidget {
           ),
           const Text('Keuangan tertata. Hidup terarah.'),
           const SizedBox(height: 8),
-          const Text('Versi 2.0.1'),
+          const Text('Versi 2.1.0'),
           const Spacer(),
           const Text(
             'Dibuat untuk pencatatan keuangan dan produktivitas yang tenang serta tersimpan lokal.',

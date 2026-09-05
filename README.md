@@ -7,12 +7,13 @@
 - One-time onboarding with currency and opening balance
 - SQLite-backed transaction/category CRUD, monthly and category budgets
 - Task CRUD, habit check-ins, real current/longest streak calculations
-- Debts/receivables, savings goals, and a seven-day dashboard spending chart
-- Finance and productivity insights from on-device records
+- Debts/receivables and savings goals with complete payment/contribution history
+- Dashboard and insights comparing income, expenses, and category rankings
+- Local task, habit, and debt due-date reminders
 - Optional Google login with explicit private Drive backup and restore
 - 30-day Lemon Squeezy Premium entitlement with automatic global ad removal
 - Material 3 light/dark/system themes, empty states, data reset, privacy/about
-- Policy-conscious AdMob foundation with resilient banners, capped interstitials, and optional rewarded insights
+- Policy-conscious AdMob foundation with resilient banners and capped interstitials; no rewarded ads
 
 ## Architecture
 
@@ -34,7 +35,7 @@ Debug/profile builds use Google's official test App ID and test ad-unit IDs. Do 
 Before release, replace the sample App ID in the Android manifest and iOS Info.plist. Supply real units without committing them:
 
 ```sh
-flutter build appbundle --release --dart-define=ADMOB_BANNER_ID=... --dart-define=ADMOB_INTERSTITIAL_ID=... --dart-define=ADMOB_REWARDED_ID=...
+flutter build appbundle --release --dart-define=ADMOB_BANNER_ID=... --dart-define=ADMOB_INTERSTITIAL_ID=...
 ```
 
 Release mode suppresses ads if IDs are absent. The publisher must configure a real privacy-policy URL, regional consent/UMP behavior, store listing, and release signing.

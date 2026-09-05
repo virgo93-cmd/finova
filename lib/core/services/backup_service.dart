@@ -88,6 +88,7 @@ class BackupService {
         ? await http.post(uri, headers: headers, body: body)
         : await http.patch(uri, headers: headers, body: body);
     _ensureSuccess(response);
+    await _preferences.setString('last_backup_at', now.toIso8601String());
     return now.toLocal();
   }
 
@@ -121,6 +122,10 @@ class BackupService {
       if (value is bool) await _preferences.setBool(key, value);
       if (value is double) await _preferences.setDouble(key, value);
     }
+    await _preferences.setString(
+      'last_backup_at',
+      (info.modifiedAt ?? DateTime.now().toUtc()).toIso8601String(),
+    );
     return info.modifiedAt?.toLocal() ?? DateTime.now();
   }
 

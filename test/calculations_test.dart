@@ -93,4 +93,22 @@ void main() {
     expect(currentHabitStreak(h, now: DateTime(2026, 9, 2)), 3);
     expect(longestHabitStreak(h), 3);
   });
+  test('savings goal clamps progress and remaining money', () {
+    const active = SavingsGoal(
+      id: 1,
+      title: 'Dana darurat',
+      targetAmount: 1000000,
+      currentAmount: 350000,
+    );
+    const exceeded = SavingsGoal(
+      id: 2,
+      title: 'Laptop',
+      targetAmount: 1000000,
+      currentAmount: 1250000,
+    );
+    expect(active.progress, .35);
+    expect(active.remaining, 650000);
+    expect(exceeded.progress, 1);
+    expect(exceeded.remaining, 0);
+  });
 }

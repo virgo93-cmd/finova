@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:finova/core/models/models.dart';
 import 'package:finova/core/theme/finova_theme.dart';
 import 'package:finova/core/services/account_service.dart';
@@ -8,10 +10,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FinovaApp extends ConsumerWidget {
+class FinovaApp extends ConsumerStatefulWidget {
   const FinovaApp({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FinovaApp> createState() => _FinovaAppState();
+}
+
+class _FinovaAppState extends ConsumerState<FinovaApp>
+    with WidgetsBindingObserver {
+  Timer? _premiumRefresh;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _premiumRefresh = Timer.periodic(const Duration(minutes: 15), (_) {
+      ref.invalidate(accountProvider);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) ref.invalidate(accountProvider);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _premiumRefresh?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.watch(accountProvider);
     final data = ref.watch(finovaControllerProvider);
     final mode = data.value?.settings.themeMode ?? AppThemeMode.system;

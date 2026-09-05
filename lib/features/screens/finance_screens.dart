@@ -25,7 +25,7 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   TransactionType? type;
   String query = '';
-  String period = 'Month';
+  String period = 'Bulan Ini';
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(finovaControllerProvider);
@@ -35,16 +35,20 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         error: (e, _) => Text('$e'),
         data: (s) {
           final now = DateTime.now();
-          final start = period == 'Week'
-              ? now.subtract(const Duration(days: 7))
-              : DateTime(now.year, now.month);
+          final DateTime? start = switch (period) {
+            '7 Hari' => now.subtract(const Duration(days: 7)),
+            '30 Hari' => now.subtract(const Duration(days: 30)),
+            'Bulan Ini' => DateTime(now.year, now.month),
+            _ => null,
+          };
           final filtered = s.transactions
               .where(
                 (t) =>
                     (type == null || t.type == type) &&
-                    t.date.isAfter(
-                      start.subtract(const Duration(seconds: 1)),
-                    ) &&
+                    (start == null ||
+                        t.date.isAfter(
+                          start.subtract(const Duration(seconds: 1)),
+                        )) &&
                     (query.isEmpty ||
                         t.note.toLowerCase().contains(query.toLowerCase()) ||
                         t.categoryName.toLowerCase().contains(
@@ -99,7 +103,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         const Spacer(),
                         DropdownButton<String>(
                           value: period,
-                          items: ['Minggu', 'Bulan']
+                          items: ['7 Hari', '30 Hari', 'Bulan Ini', 'Semua']
                               .map(
                                 (x) =>
                                     DropdownMenuItem(value: x, child: Text(x)),

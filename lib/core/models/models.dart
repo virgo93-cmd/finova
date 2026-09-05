@@ -150,6 +150,36 @@ class SavingsGoal {
   int get remaining => (targetAmount - currentAmount).clamp(0, targetAmount);
 }
 
+class GoalContribution {
+  const GoalContribution({
+    required this.id,
+    required this.goalId,
+    required this.amount,
+    required this.date,
+    required this.note,
+  });
+  final int id;
+  final int goalId;
+  final int amount;
+  final DateTime date;
+  final String note;
+}
+
+class DebtPayment {
+  const DebtPayment({
+    required this.id,
+    required this.debtId,
+    required this.amount,
+    required this.date,
+    required this.note,
+  });
+  final int id;
+  final int debtId;
+  final int amount;
+  final DateTime date;
+  final String note;
+}
+
 class FinovaSettings {
   const FinovaSettings({
     this.currency = 'IDR',

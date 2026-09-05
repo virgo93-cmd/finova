@@ -72,6 +72,20 @@ class GoalsPage extends ConsumerWidget {
                               'Target ${goal.targetDate!.day}/${goal.targetDate!.month}/${goal.targetDate!.year}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
+                          if (!goal.progress.isNaN && goal.progress < 1)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                onPressed: () => _addContribution(
+                                  context,
+                                  ref,
+                                  goal,
+                                  state.settings.currency,
+                                ),
+                                icon: const Icon(Icons.add_card_outlined),
+                                label: const Text('Tambah setoran'),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -80,6 +94,63 @@ class GoalsPage extends ConsumerWidget {
               },
             ),
     );
+  }
+
+  Future<void> _addContribution(
+    BuildContext context,
+    WidgetRef ref,
+    SavingsGoal goal,
+    String currency,
+  ) async {
+    final amountController = TextEditingController();
+    final noteController = TextEditingController();
+    final result = await showDialog<(int, String)>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Setoran · ${goal.title}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountController,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: 'Nominal',
+                helperText: 'Sisa ${formatMoney(goal.remaining, currency)}',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                labelText: 'Catatan (opsional)',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, (
+              int.tryParse(amountController.text) ?? 0,
+              noteController.text,
+            )),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    amountController.dispose();
+    noteController.dispose();
+    if (result == null || result.$1 <= 0 || !context.mounted) return;
+    await ref
+        .read(finovaControllerProvider.notifier)
+        .addGoalContribution(goal, result.$1, result.$2);
   }
 }
 
@@ -123,60 +194,88 @@ class _GoalFormPageState extends ConsumerState<GoalFormPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(widget.goal == null ? 'Target baru' : 'Ubah target'),
-      actions: [
-        if (widget.goal != null)
-          IconButton(
-            tooltip: 'Hapus',
-            onPressed: _delete,
-            icon: const Icon(Icons.delete_outline),
+  Widget build(BuildContext context) {
+    final state = ref.watch(finovaControllerProvider).value;
+    final history = widget.goal == null || state == null
+        ? const <GoalContribution>[]
+        : state.goalContributions
+              .where((entry) => entry.goalId == widget.goal!.id)
+              .toList();
+    final currency = state?.settings.currency ?? 'IDR';
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.goal == null ? 'Target baru' : 'Ubah target'),
+        actions: [
+          if (widget.goal != null)
+            IconButton(
+              tooltip: 'Hapus',
+              onPressed: _delete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          TextField(
+            controller: title,
+            autofocus: widget.goal == null,
+            decoration: const InputDecoration(
+              labelText: 'Nama target',
+              prefixIcon: Icon(Icons.flag_outlined),
+            ),
           ),
-      ],
-    ),
-    body: ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        TextField(
-          controller: title,
-          autofocus: widget.goal == null,
-          decoration: const InputDecoration(
-            labelText: 'Nama target',
-            prefixIcon: Icon(Icons.flag_outlined),
+          const SizedBox(height: 14),
+          TextField(
+            controller: target,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(labelText: 'Nominal target'),
           ),
-        ),
-        const SizedBox(height: 14),
-        TextField(
-          controller: target,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: const InputDecoration(labelText: 'Nominal target'),
-        ),
-        const SizedBox(height: 14),
-        TextField(
-          controller: current,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: const InputDecoration(labelText: 'Sudah terkumpul'),
-        ),
-        const SizedBox(height: 14),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.event_outlined),
-          title: Text(
-            targetDate == null
-                ? 'Tanpa batas waktu'
-                : '${targetDate!.day}/${targetDate!.month}/${targetDate!.year}',
+          const SizedBox(height: 14),
+          TextField(
+            controller: current,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(labelText: 'Sudah terkumpul'),
           ),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: _pickDate,
-        ),
-        const SizedBox(height: 24),
-        FilledButton(onPressed: _save, child: const Text('Simpan target')),
-      ],
-    ),
-  );
+          const SizedBox(height: 14),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.event_outlined),
+            title: Text(
+              targetDate == null
+                  ? 'Tanpa batas waktu'
+                  : '${targetDate!.day}/${targetDate!.month}/${targetDate!.year}',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickDate,
+          ),
+          const SizedBox(height: 24),
+          FilledButton(onPressed: _save, child: const Text('Simpan target')),
+          if (history.isNotEmpty) ...[
+            const SizedBox(height: 28),
+            const SectionTitle('Riwayat setoran'),
+            ...history.map(
+              (entry) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  child: Icon(entry.amount >= 0 ? Icons.add : Icons.remove),
+                ),
+                title: Text(entry.note),
+                subtitle: Text(
+                  '${entry.date.day}/${entry.date.month}/${entry.date.year}',
+                ),
+                trailing: Text(
+                  '${entry.amount >= 0 ? '+' : ''}${formatMoney(entry.amount, currency)}',
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Future<void> _pickDate() async {
     final value = await showDatePicker(

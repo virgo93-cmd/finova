@@ -485,43 +485,6 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             ..._productivity(context, s, start),
           const SizedBox(height: 20),
           FinovaBannerAd(enabled: s.settings.adsEnabled),
-          const SizedBox(height: 18),
-          OutlinedButton.icon(
-            onPressed: () => AdService.showRewarded(
-              onReward: () {
-                if (mounted) {
-                  showDialog<void>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Insight tambahan'),
-                      content: Text(
-                        summary.expense > summary.income
-                            ? 'Pengeluaran Anda lebih besar daripada pemasukan pada periode ini. Tinjau kategori terbesar dan pertimbangkan anggaran yang lebih ketat.'
-                            : 'Arus kas bersih Anda positif pada periode ini. Pertimbangkan mengalokasikan sebagian selisih untuk tujuan atau dana darurat.',
-                      ),
-                      actions: [
-                        FilledButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Selesai'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
-              onUnavailable: () {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Iklan berbonus belum tersedia saat ini.'),
-                    ),
-                  );
-                }
-              },
-            ),
-            icon: const Icon(Icons.ondemand_video_outlined),
-            label: const Text('Tonton iklan untuk insight tambahan'),
-          ),
         ],
       ),
     );
@@ -562,6 +525,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         ('Pengeluaran', sum.expense),
         ('Bersih', sum.balance),
       ], s.settings.currency),
+      const SizedBox(height: 22),
+      const SectionTitle('Tren pemasukan & pengeluaran'),
+      const SizedBox(height: 10),
+      _PeriodCashflowChart(values: _cashflowBuckets(tx.toList())),
       const SizedBox(height: 22),
       const SectionTitle('Peringkat kategori'),
       const SizedBox(height: 8),
@@ -608,6 +575,30 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         ),
       ],
     ];
+  }
+
+  List<(int, int)> _cashflowBuckets(List<MoneyTransaction> transactions) {
+    final bucketCount = 7;
+    final bucketDays = (days / bucketCount).ceil();
+    final now = DateTime.now();
+    return List.generate(bucketCount, (index) {
+      final end = now.subtract(
+        Duration(days: (bucketCount - index - 1) * bucketDays),
+      );
+      final start = end.subtract(Duration(days: bucketDays));
+      var income = 0;
+      var expense = 0;
+      for (final item in transactions) {
+        if (item.date.isAfter(start) && !item.date.isAfter(end)) {
+          if (item.type == TransactionType.income) {
+            income += item.amount;
+          } else {
+            expense += item.amount;
+          }
+        }
+      }
+      return (income, expense);
+    });
   }
 
   Widget _categoryHeading(
@@ -718,4 +709,104 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
           ),
         ),
       );
+}
+
+class _PeriodCashflowChart extends StatelessWidget {
+  const _PeriodCashflowChart({required this.values});
+  final List<(int, int)> values;
+
+  @override
+  Widget build(BuildContext context) {
+    final maximum = values
+        .expand((value) => [value.$1, value.$2])
+        .fold(0, (a, b) => a > b ? a : b);
+    return Container(
+      height: 180,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: const [
+              _ChartLegend(color: Color(0xFF159B7D), label: 'Pemasukan'),
+              SizedBox(width: 12),
+              _ChartLegend(color: Color(0xFFE76F51), label: 'Pengeluaran'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: maximum == 0
+                ? const Center(child: Text('Belum ada data pada periode ini.'))
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: values.map((value) {
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: FractionallySizedBox(
+                                  heightFactor: (value.$1 / maximum).clamp(
+                                    .025,
+                                    1,
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF159B7D),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: FractionallySizedBox(
+                                  heightFactor: (value.$2 / maximum).clamp(
+                                    .025,
+                                    1,
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE76F51),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartLegend extends StatelessWidget {
+  const _ChartLegend({required this.color, required this.label});
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 5),
+      Text(label, style: Theme.of(context).textTheme.labelSmall),
+    ],
+  );
 }
