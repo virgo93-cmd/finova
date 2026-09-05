@@ -483,7 +483,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
           ),
           const SizedBox(height: 20),
           if (tab == 0)
-            ..._finance(context, s, tx, summary)
+            ..._finance(context, s, tx, summary, isPremium)
           else
             ..._productivity(context, s, start),
           const SizedBox(height: 20),
@@ -498,6 +498,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     FinovaState s,
     Iterable<MoneyTransaction> tx,
     FinanceSummary sum,
+    bool isPremium,
   ) {
     final expensesByCategory = <String, int>{};
     for (final t in tx.where((x) => x.type == TransactionType.expense)) {
