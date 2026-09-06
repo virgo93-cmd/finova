@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     shortcut: '/brand/finova-icon.png',
     apple: '/brand/finova-icon.png',
   },
-  openGraph: { title: 'Finova — Keuangan Lebih Jelas. Hidup Lebih Terarah.', description: 'Keuangan pribadi dan produktivitas harian untuk Android dengan pilihan multi-mata uang.', url: 'https://finova.ailooma.biz.id', siteName: 'Finova', images: [{ url: '/og.png', width: 1024, height: 500 }], locale: 'id_ID', type: 'website' },
+  openGraph: { title: 'Finova — Keuangan Lebih Jelas. Hidup Lebih Terarah.', description: 'Keuangan pribadi dan produktivitas harian untuk Android dengan pilihan multi-mata uang.', url: 'https://finova.ailooma.biz.id', siteName: 'Finova', images: [{ url: '/og.png', width: 1200, height: 768 }], locale: 'id_ID', type: 'website' },
   twitter: { card: 'summary_large_image', title: 'Finova — Keuangan Lebih Jelas. Hidup Lebih Terarah.', description: 'Keuangan pribadi dan produktivitas harian untuk Android dengan pilihan multi-mata uang.', images: ['/og.png'] },
 };
 
