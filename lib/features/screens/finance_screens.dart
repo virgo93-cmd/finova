@@ -125,17 +125,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
-                        itemCount: filtered.length + 1,
-                        itemBuilder: (c, i) => i == filtered.length
-                            ? FinovaBannerAd(enabled: s.settings.adsEnabled)
-                            : TransactionTile(
-                                transaction: filtered[i],
-                                currency: s.settings.currency,
-                                onTap: () => TransactionDetailPage.show(
-                                  context,
-                                  filtered[i],
-                                ),
-                              ),
+                        itemCount: filtered.length,
+                        itemBuilder: (c, i) => TransactionTile(
+                          transaction: filtered[i],
+                          currency: s.settings.currency,
+                          onTap: () =>
+                              TransactionDetailPage.show(context, filtered[i]),
+                        ),
                       ),
               ),
             ],

@@ -3,15 +3,18 @@ import 'package:finova/features/screens/finance_screens.dart';
 import 'package:finova/features/screens/debt_screen.dart';
 import 'package:finova/features/screens/home_page.dart';
 import 'package:finova/features/screens/productivity_screens.dart';
+import 'package:finova/features/state/finova_controller.dart';
+import 'package:finova/core/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   int _index = 0;
   static const _pages = [
     HomePage(),
@@ -22,38 +25,61 @@ class _MainShellState extends State<MainShell> {
   ];
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: IndexedStack(index: _index, children: _pages),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: _index,
-      onDestinationSelected: (value) => setState(() => _index = value),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Beranda',
+    body: Column(
+      children: [
+        Expanded(
+          child: IndexedStack(index: _index, children: _pages),
         ),
-        NavigationDestination(icon: Icon(Icons.swap_horiz), label: 'Transaksi'),
-        NavigationDestination(
-          icon: Icon(Icons.account_balance_wallet_outlined),
-          selectedIcon: Icon(Icons.account_balance_wallet),
-          label: 'Hutang',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.check_circle_outline),
-          label: 'Aktivitas',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.insights_outlined),
-          label: 'Insight',
-        ),
+        ref
+            .watch(finovaControllerProvider)
+            .maybeWhen(
+              data: (state) => Center(
+                child: FinovaBannerAd(enabled: state.settings.adsEnabled),
+              ),
+              orElse: () => const SizedBox.shrink(),
+            ),
       ],
     ),
-    floatingActionButton: FloatingActionButton.extended(
+    floatingActionButton: FloatingActionButton(
       onPressed: _quickActions,
-      icon: const Icon(Icons.add),
-      label: const Text('Tambah'),
+      tooltip: 'Tambah cepat',
+      child: const Icon(Icons.add_rounded),
     ),
     floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    bottomNavigationBar: SafeArea(
+      minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (value) => setState(() => _index = value),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Beranda',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.swap_horiz),
+              label: 'Transaksi',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(Icons.account_balance_wallet),
+              label: 'Hutang',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.check_circle_outline),
+              label: 'Aktivitas',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.insights_outlined),
+              label: 'Insight',
+            ),
+          ],
+        ),
+      ),
+    ),
   );
   void _quickActions() => showModalBottomSheet<void>(
     context: context,

@@ -4,6 +4,7 @@ import 'package:finova/core/services/ad_service.dart';
 import 'package:finova/core/services/calculations.dart';
 import 'package:finova/core/utils/formatters.dart';
 import 'package:finova/core/widgets/common_widgets.dart';
+import 'package:finova/core/widgets/finova_line_chart.dart';
 import 'package:finova/features/screens/finance_screens.dart';
 import 'package:finova/features/state/finova_controller.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,6 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
         _taskSection('Hari ini', open),
         _taskSection('Mendatang', upcoming),
         _taskSection('Selesai', done),
-        FinovaBannerAd(enabled: s.settings.adsEnabled),
       ],
     );
   }
@@ -193,7 +193,6 @@ class _ProductivityPageState extends ConsumerState<ProductivityPage> {
           );
         }),
         const SizedBox(height: 18),
-        FinovaBannerAd(enabled: s.settings.adsEnabled),
       ],
     );
   }
@@ -487,7 +486,6 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
           else
             ..._productivity(context, s, start),
           const SizedBox(height: 20),
-          FinovaBannerAd(enabled: s.settings.adsEnabled),
         ],
       ),
     );
@@ -556,7 +554,14 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       const SizedBox(height: 22),
       const SectionTitle('Tren pemasukan & pengeluaran'),
       const SizedBox(height: 10),
-      _PeriodCashflowChart(values: _cashflowBuckets(tx.toList())),
+      SizedBox(
+        height: 165,
+        child: FinovaLineChart(
+          income: _cashflowBuckets(tx.toList()).map((x) => x.$1).toList(),
+          expense: _cashflowBuckets(tx.toList()).map((x) => x.$2).toList(),
+          labels: List.generate(7, (i) => '${i + 1}'),
+        ),
+      ),
       const SizedBox(height: 22),
       const SectionTitle('Peringkat kategori'),
       const SizedBox(height: 8),

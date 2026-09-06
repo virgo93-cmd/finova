@@ -14,12 +14,12 @@ class FinovaTheme {
       colorScheme: scheme,
       brightness: brightness,
       scaffoldBackgroundColor: brightness == Brightness.light
-          ? const Color(0xFFF7F9F8)
-          : const Color(0xFF0F1514),
+          ? const Color(0xFFF4F7F6)
+          : const Color(0xFF091210),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -29,9 +29,32 @@ class FinovaTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+        height: 68,
+        backgroundColor: brightness == Brightness.light
+            ? const Color(0xFF10211E)
+            : const Color(0xFF15231F),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 11,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+            color: states.contains(WidgetState.selected)
+                ? const Color(0xFF6EE7C2)
+                : Colors.white70,
+          ),
         ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? const Color(0xFF6EE7C2)
+                : Colors.white70,
+          ),
+        ),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        indicatorColor: const Color(0xFF23473F),
       ),
     );
   }

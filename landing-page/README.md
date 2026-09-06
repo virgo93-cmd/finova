@@ -25,7 +25,7 @@ npm run build
 
 ## Required public endpoints
 
-- `/downloads/finova-android-v2.2.0.apk` — signed Android release APK
+- `/downloads/finova-android-v2.3.0.apk` — signed Android release APK
 - `/api/webhook` — signed Lemon Squeezy `order_created` webhook
 - `/privacy` — Privacy Policy
 - `/terms` — Terms of Use
@@ -34,8 +34,8 @@ npm run build
 
 ## Release file
 
-- Version: `2.2.0`
-- SHA-256: `ACA39628D6FD13F920A646592B305F77E5383813FE255D43AFDF744BCE8A500C`
+- Version: `2.3.0`
+- SHA-256: `39B60FCA3A6C89AA2BCBECCF45E5F2BEA8DC96801F9CB3D8259DCBD061D74633`
 
 When the APK changes, replace the file in `public/downloads`, update the version and checksum on the homepage, then run `npm run build` again.
 

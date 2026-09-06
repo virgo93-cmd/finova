@@ -5,6 +5,7 @@ import 'package:finova/core/services/account_service.dart';
 import 'package:finova/core/services/calculations.dart';
 import 'package:finova/core/utils/formatters.dart';
 import 'package:finova/core/widgets/common_widgets.dart';
+import 'package:finova/core/widgets/finova_line_chart.dart';
 import 'package:finova/features/screens/finance_screens.dart';
 import 'package:finova/features/screens/goals_screen.dart';
 import 'package:finova/features/screens/productivity_screens.dart';
@@ -13,10 +14,18 @@ import 'package:finova/features/state/finova_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  String _trendRange = 'Harian';
+  DateTimeRange? _customRange;
+
+  @override
+  Widget build(BuildContext context) {
     final async = ref.watch(finovaControllerProvider);
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -43,183 +52,167 @@ class HomePage extends ConsumerWidget {
                   budget.month.month == now.month,
             )
             .firstOrNull;
-        final expenseTrend = List<int>.generate(7, (index) {
-          final day = dateOnly(now.subtract(Duration(days: 6 - index)));
-          return state.transactions
-              .where(
-                (item) =>
-                    item.type == TransactionType.expense &&
-                    dateOnly(item.date) == day,
-              )
-              .fold(0, (sum, item) => sum + item.amount);
-        });
-        final incomeTrend = List<int>.generate(7, (index) {
-          final day = dateOnly(now.subtract(Duration(days: 6 - index)));
-          return state.transactions
-              .where(
-                (item) =>
-                    item.type == TransactionType.income &&
-                    dateOnly(item.date) == day,
-              )
-              .fold(0, (sum, item) => sum + item.amount);
-        });
+        final trend = _trend(state.transactions);
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () =>
                 ref.read(finovaControllerProvider.notifier).refresh(),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
               children: [
                 Row(
                   children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundImage: account?.localAvatarPath != null
+                          ? FileImage(File(account!.localAvatarPath!))
+                          : account?.avatarUrl != null
+                          ? NetworkImage(account!.avatarUrl!)
+                          : null,
+                      child:
+                          account?.localAvatarPath == null &&
+                              account?.avatarUrl == null
+                          ? const Icon(Icons.person_outline)
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            greeting(),
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                            account?.displayName ?? 'Pengguna Finova',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
                           ),
-                          const Text('Ringkasan aktivitas Anda hari ini.'),
+                          Text(
+                            greeting(),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ],
                       ),
                     ),
-                    IconButton(
+                    IconButton.filledTonal(
+                      onPressed: () => _showNotifications(context, state),
+                      tooltip: 'Pengingat',
+                      icon: const Icon(
+                        Icons.notifications_none_rounded,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    IconButton.filledTonal(
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
                       ),
-                      icon: const Icon(Icons.settings_outlined),
+                      icon: const Icon(Icons.settings_outlined, size: 20),
                     ),
                   ],
                 ),
                 const SizedBox(height: 22),
-                Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF087F68), Color(0xFF075C50)],
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 650),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) => Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 16 * (1 - value)),
+                      child: child,
                     ),
-                    borderRadius: BorderRadius.circular(24),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 22,
-                            backgroundImage: account?.localAvatarPath != null
-                                ? FileImage(File(account!.localAvatarPath!))
-                                : account?.avatarUrl != null
-                                ? NetworkImage(account!.avatarUrl!)
-                                : null,
-                            child:
-                                account?.localAvatarPath == null &&
-                                    account?.avatarUrl == null
-                                ? const Icon(Icons.person_outline)
-                                : null,
+                      Container(
+                        height: 158,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF087F68), Color(0xFF075C50)],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      Positioned(
+                        left: 20,
+                        top: 16,
+                        right: 18,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
                               children: [
-                                Text(
-                                  account?.displayName ?? 'Profil Finova',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                                Icon(
+                                  Icons.account_balance_wallet_outlined,
+                                  color: Colors.white70,
+                                  size: 19,
                                 ),
+                                SizedBox(width: 7),
                                 Text(
-                                  account?.isPremium == true
-                                      ? 'Premium aktif'
-                                      : 'Ringkasan keuangan Anda',
-                                  style: const TextStyle(
+                                  'Saldo',
+                                  style: TextStyle(
                                     color: Colors.white70,
-                                    fontSize: 12,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Saldo saat ini',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        formatMoney(all.balance, state.settings.currency),
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                      const SizedBox(height: 22),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _metric(
-                              'Pemasukan bulan ini',
-                              formatMoney(
-                                month.income,
-                                state.settings.currency,
+                            const SizedBox(height: 3),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                formatMoney(
+                                  all.balance,
+                                  state.settings.currency,
+                                ),
+                                style: Theme.of(context).textTheme.displaySmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                               ),
-                              Colors.greenAccent,
                             ),
-                          ),
-                          Expanded(
-                            child: _metric(
-                              'Pengeluaran bulan ini',
-                              formatMoney(
-                                month.expense,
-                                state.settings.currency,
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        left: 20,
+                        right: 18,
+                        bottom: 12,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _highlightMetric(
+                                'Pengeluaran',
+                                formatMoney(
+                                  all.expense,
+                                  state.settings.currency,
+                                ),
+                                const Color(0xFFFFA17A),
                               ),
-                              Colors.orangeAccent,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _highlightMetric(
+                                'Pemasukan',
+                                formatMoney(
+                                  all.income,
+                                  state.settings.currency,
+                                ),
+                                const Color(0xFF70E8BD),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                const SectionTitle('Tren arus kas 7 hari'),
-                const SizedBox(height: 10),
-                _CashflowChart(
-                  incomeValues: incomeTrend,
-                  expenseValues: expenseTrend,
-                ),
-                const SizedBox(height: 24),
-                SectionTitle(
-                  'Anggaran bulanan',
-                  action: overall == null ? 'Atur anggaran' : 'Ubah',
-                  onAction: () => BudgetFormPage.show(context),
-                ),
-                const SizedBox(height: 10),
-                if (overall == null)
-                  const EmptyState(
-                    icon: Icons.savings_outlined,
-                    title: 'Rencanakan bulan ini',
-                    message:
-                        'Atur anggaran bulanan agar pengeluaran tetap terpantau.',
-                  )
-                else
-                  _budgetCard(
-                    context,
-                    overall.amount,
-                    month.expense,
-                    state.settings.currency,
-                  ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
                 const SectionTitle('Aksi cepat'),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -255,6 +248,79 @@ class HomePage extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    const Expanded(child: SectionTitle('Tren arus kas')),
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _trendRange,
+                        items:
+                            ['Harian', 'Mingguan', 'Bulanan', 'Pilih tanggal']
+                                .map(
+                                  (x) => DropdownMenuItem(
+                                    value: x,
+                                    child: Text(x),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (value) async {
+                          if (value == 'Pilih tanggal') {
+                            final picked = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                              initialDateRange:
+                                  _customRange ??
+                                  DateTimeRange(
+                                    start: now.subtract(
+                                      const Duration(days: 6),
+                                    ),
+                                    end: now,
+                                  ),
+                            );
+                            if (picked != null)
+                              setState(() {
+                                _customRange = picked;
+                                _trendRange = value!;
+                              });
+                          } else if (value != null)
+                            setState(() => _trendRange = value);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 155,
+                  child: FinovaLineChart(
+                    income: trend.$1,
+                    expense: trend.$2,
+                    labels: trend.$3,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SectionTitle(
+                  'Anggaran bulanan',
+                  action: overall == null ? 'Atur anggaran' : 'Ubah',
+                  onAction: () => BudgetFormPage.show(context),
+                ),
+                const SizedBox(height: 10),
+                if (overall == null)
+                  const EmptyState(
+                    icon: Icons.savings_outlined,
+                    title: 'Rencanakan bulan ini',
+                    message:
+                        'Atur anggaran bulanan agar pengeluaran tetap terpantau.',
+                  )
+                else
+                  _budgetCard(
+                    context,
+                    overall.amount,
+                    month.expense,
+                    state.settings.currency,
+                  ),
                 const SizedBox(height: 24),
                 const SectionTitle('Produktivitas hari ini'),
                 Card(
@@ -347,17 +413,157 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _metric(String label, String value, Color color) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-      const SizedBox(height: 4),
-      Text(
-        value,
-        style: TextStyle(color: color, fontWeight: FontWeight.w700),
-      ),
-    ],
+  (List<int>, List<int>, List<String>) _trend(List<MoneyTransaction> items) {
+    final now = DateTime.now();
+    final custom = _trendRange == 'Pilih tanggal' && _customRange != null;
+    final count = custom
+        ? 7
+        : _trendRange == 'Mingguan'
+        ? 8
+        : _trendRange == 'Bulanan'
+        ? 6
+        : 7;
+    final step = custom
+        ? ((_customRange!.duration.inDays + 1) / count).ceil()
+        : _trendRange == 'Mingguan'
+        ? 7
+        : _trendRange == 'Bulanan'
+        ? 30
+        : 1;
+    final end = custom ? dateOnly(_customRange!.end) : dateOnly(now);
+    final income = <int>[];
+    final expense = <int>[];
+    final labels = <String>[];
+    for (var i = count - 1; i >= 0; i--) {
+      final bucketEnd = end.subtract(Duration(days: i * step));
+      final bucketStart = bucketEnd.subtract(Duration(days: step - 1));
+      final values = items.where((item) {
+        final day = dateOnly(item.date);
+        return !day.isBefore(bucketStart) && !day.isAfter(bucketEnd);
+      });
+      income.add(
+        values
+            .where((x) => x.type == TransactionType.income)
+            .fold(0, (a, x) => a + x.amount),
+      );
+      expense.add(
+        values
+            .where((x) => x.type == TransactionType.expense)
+            .fold(0, (a, x) => a + x.amount),
+      );
+      labels.add(
+        _trendRange == 'Bulanan'
+            ? '${bucketEnd.month}/${bucketEnd.year % 100}'
+            : '${bucketEnd.day}/${bucketEnd.month}',
+      );
+    }
+    return (income, expense, labels);
+  }
+
+  Widget _highlightMetric(String label, String value, Color color) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .14),
+      border: Border.all(color: color.withValues(alpha: .28)),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
+
+  void _showNotifications(BuildContext context, FinovaState state) {
+    final tasks = state.tasks.where((item) => !item.completed).toList()
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final debts = state.debts.where((item) => !item.isSettled).toList()
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final items = <Widget>[
+      ...tasks
+          .take(3)
+          .map(
+            (task) => ListTile(
+              leading: const CircleAvatar(child: Icon(Icons.task_alt_rounded)),
+              title: Text(task.title),
+              subtitle: Text('Tenggat ${_shortDate(task.dueDate)}'),
+            ),
+          ),
+      ...debts
+          .take(3)
+          .map(
+            (debt) => ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.handshake_outlined),
+              ),
+              title: Text(
+                '${debt.person} · ${formatMoney(debt.remaining, state.settings.currency)}',
+              ),
+              subtitle: Text('Jatuh tempo ${_shortDate(debt.dueDate)}'),
+            ),
+          ),
+    ];
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'Pusat pengingat',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              const SizedBox(height: 4),
+              if (items.isEmpty)
+                const ListTile(
+                  leading: CircleAvatar(child: Icon(Icons.done_all_rounded)),
+                  title: Text('Semua aman'),
+                  subtitle: Text(
+                    'Belum ada tugas atau jatuh tempo yang perlu diingatkan.',
+                  ),
+                )
+              else
+                ...items,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _shortDate(DateTime value) =>
+      '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+
   Widget _quick(
     BuildContext context,
     IconData icon,
@@ -428,9 +634,11 @@ class _CashflowChart extends StatelessWidget {
   const _CashflowChart({
     required this.incomeValues,
     required this.expenseValues,
+    required this.labels,
   });
   final List<int> incomeValues;
   final List<int> expenseValues;
+  final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
@@ -461,83 +669,42 @@ class _CashflowChart extends StatelessWidget {
             Expanded(
               child: maxValue == 0
                   ? const Center(
-                      child: Text('Belum ada transaksi dalam 7 hari.'),
+                      child: Text('Belum ada data pada periode ini.'),
                     )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(incomeValues.length, (index) {
-                        final incomeRatio = incomeValues[index] / maxValue;
-                        final expenseRatio = expenseValues[index] / maxValue;
-                        final day = DateTime.now().subtract(
-                          Duration(days: 6 - index),
-                        );
-                        const labels = [
-                          'Sen',
-                          'Sel',
-                          'Rab',
-                          'Kam',
-                          'Jum',
-                          'Sab',
-                          'Min',
-                        ];
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Expanded(
-                                          child: FractionallySizedBox(
-                                            heightFactor: incomeRatio.clamp(
-                                              .03,
-                                              1,
-                                            ),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF159B7D),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Expanded(
-                                          child: FractionallySizedBox(
-                                            heightFactor: expenseRatio.clamp(
-                                              .03,
-                                              1,
-                                            ),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFE76F51),
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  labels[day.weekday - 1],
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                              ],
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 900),
+                            curve: Curves.easeOutCubic,
+                            builder: (_, value, __) => CustomPaint(
+                              painter: _CashflowPainter(
+                                incomeValues,
+                                expenseValues,
+                                maxValue,
+                                value,
+                              ),
+                              child: const SizedBox.expand(),
                             ),
                           ),
-                        );
-                      }),
+                        ),
+                        Row(
+                          children: labels
+                              .map(
+                                (label) => Expanded(
+                                  child: Text(
+                                    label,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
                     ),
             ),
           ],
@@ -557,4 +724,57 @@ class _CashflowChart extends StatelessWidget {
       Text(label, style: Theme.of(context).textTheme.labelSmall),
     ],
   );
+}
+
+class _CashflowPainter extends CustomPainter {
+  _CashflowPainter(this.income, this.expense, this.maxValue, this.progress);
+  final List<int> income;
+  final List<int> expense;
+  final int maxValue;
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final grid = Paint()
+      ..color = const Color(0x227F8C8D)
+      ..strokeWidth = 1;
+    for (var i = 1; i < 4; i++) {
+      final y = size.height * i / 4;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    }
+    void drawLine(List<int> values, Color color) {
+      final path = Path();
+      final points = <Offset>[];
+      for (var i = 0; i < values.length; i++) {
+        final x = values.length == 1
+            ? size.width / 2
+            : size.width * i / (values.length - 1);
+        final y =
+            size.height -
+            (values[i] / maxValue) * size.height * .88 -
+            size.height * .06;
+        points.add(Offset(x, y));
+        if (i == 0)
+          path.moveTo(x, y);
+        else
+          path.lineTo(x, y);
+      }
+      final reveal = path.computeMetrics().first;
+      final visible = reveal.extractPath(0, reveal.length * progress);
+      final line = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round;
+      canvas.drawPath(visible, line);
+      final dot = Paint()..color = color;
+      for (final p in points) canvas.drawCircle(p, 4, dot);
+    }
+
+    drawLine(income, const Color(0xFF159B7D));
+    drawLine(expense, const Color(0xFFE76F51));
+  }
+
+  @override
+  bool shouldRepaint(covariant _CashflowPainter oldDelegate) => true;
 }
