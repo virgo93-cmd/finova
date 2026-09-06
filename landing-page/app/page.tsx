@@ -113,7 +113,7 @@ const indonesian: Record<string, string> = {
   "with one small check-in.": "dari satu langkah kecil.",
   "Download the official Finova APK directly and install it on your Android device.": "Unduh APK resmi Finova secara langsung dan pasang di perangkat Android Anda.",
   "Download Finova APK": "Unduh APK Finova",
-  "Version 2.3.0 · Android only · 69 MB": "Versi 2.3.0 · Khusus Android · 69 MB",
+  "Version 2.3.0 · Android only · 71 MB": "Versi 2.3.0 · Khusus Android · 71 MB",
   "Money clarity. Everyday momentum.": "Keuangan lebih jelas. Hidup lebih terarah.",
   "Terms": "Ketentuan",
   "© 2026 Finova. All rights reserved.": "© 2026 Finova. Seluruh hak dilindungi.",
@@ -428,7 +428,7 @@ export default function Home() {
             <ArrowDownToLine size={20} />
             Download Finova APK
           </Link>
-          <small>Version 2.3.0 · Android only · 69 MB</small>
+          <small>Version 2.3.0 · Android only · 71 MB</small>
         </div>
       </section>
 

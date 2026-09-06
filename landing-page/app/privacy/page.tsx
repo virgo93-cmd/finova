@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           <p>Premium checkout is provided by Lemon Squeezy. Finova sends your account identifier and pre-fills your email so a verified payment webhook can activate 30 days of ad-free access. Payment details are processed by Lemon Squeezy and are not stored inside the Finova app.</p>
 
           <h2>Advertising and consent</h2>
-          <p>The free version of Finova uses the Google Mobile Ads SDK to show banner ads and limited interstitial ads. Google and its partners may process an advertising identifier, IP address, device information, ad interactions, diagnostics, approximate network-based location, and consent choices under their own policies. Finova uses Google&apos;s consent mechanism where required. Active Premium access disables all ads.</p>
+          <p>The free version of Finova uses the Google Mobile Ads SDK and mediation partners, including Meta Audience Network, to show banner, interstitial, and optional rewarded ads. Google, Meta, and their partners may process an advertising identifier, IP address, device information, ad interactions, diagnostics, approximate network-based location, and consent choices under their own policies. Finova uses Google&apos;s consent mechanism where required. Active Premium access disables all ads.</p>
 
           <h2>Notifications</h2>
           <p>If you enable reminders, Finova requests notification permission and schedules reminders locally on your device. You can disable them through Finova or Android system settings.</p>

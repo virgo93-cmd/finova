@@ -35,7 +35,7 @@ npm run build
 ## Release file
 
 - Version: `2.3.0`
-- SHA-256: `39B60FCA3A6C89AA2BCBECCF45E5F2BEA8DC96801F9CB3D8259DCBD061D74633`
+- SHA-256: `1038E24942161E3CB008F7710AD2EA6D7E2033ED9D540F8E584CEE4BBF6C186A`
 
 When the APK changes, replace the file in `public/downloads`, update the version and checksum on the homepage, then run `npm run build` again.
 
